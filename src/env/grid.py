@@ -1,5 +1,7 @@
 import random
 from collections import deque
+import numpy as np
+import matplotlib.pyplot as plt
 from block import Block
 import sys
 
@@ -8,6 +10,12 @@ class Grid:
         self.grid = [[0 for _ in range(101)] for _ in range(101)]
         self.unblocked = deque()
 
+    def display_grid(self):
+        # for row in self.grid:
+        #     print(' '.join(map(str, row)))
+        plt.imshow(self.grid, cmap='binary', interpolation='nearest')
+        plt.axis('off')  # Turn off the axis
+        plt.show()
 
     def init_start(self):
         x_start = random.randint(0,len(self.grid) - 1)
@@ -21,8 +29,6 @@ class Grid:
         start = self.init_start()
         visited = set()
         self.dfs(start, visited)
-        # for row in self.grid:
-        #     print(' '.join(map(str, row)))
 
     def dfs(self, start_block, visited):
         if (start_block in visited) or (start_block.x <0) or (start_block.y <0) or (start_block.x > len(self.grid) - 1) or  (start_block.y > len(self.grid) - 1):
@@ -47,7 +53,7 @@ if __name__ == "__main__":
     sys.setrecursionlimit(10201)
     grid = Grid()
     grid.create_maze()            
-        
+    grid.display_grid()    
 
 
 
