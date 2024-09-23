@@ -1,10 +1,11 @@
 import random
 from collections import deque
 from block import Block
+import sys
 
 class Grid:
     def __init__(self):
-        self.grid = [[0 for _ in range(80)] for _ in range(80)]
+        self.grid = [[0 for _ in range(101)] for _ in range(101)]
         self.unblocked = deque()
 
 
@@ -19,17 +20,14 @@ class Grid:
     def create_maze(self):
         start = self.init_start()
         visited = set()
-        print(f"start: ({start.x}, {start.y})")
         self.dfs(start, visited)
         # for row in self.grid:
         #     print(' '.join(map(str, row)))
 
     def dfs(self, start_block, visited):
-        print(len(visited))
         if (start_block in visited) or (start_block.x <0) or (start_block.y <0) or (start_block.x > len(self.grid) - 1) or  (start_block.y > len(self.grid) - 1):
             return
       
-        print(f"Visiting: ({start_block.x}, {start_block.y})")
         visited.add(start_block)
 
         blockedness = random.choices([0,1], weights = [0.7, 0.3])[0]
@@ -46,6 +44,7 @@ class Grid:
             self.dfs(Block(start_block.x+change_x, start_block.y+change_y), visited)
         
 if __name__ == "__main__":
+    sys.setrecursionlimit(10201)
     grid = Grid()
     grid.create_maze()            
         
