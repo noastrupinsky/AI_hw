@@ -4,13 +4,13 @@ from block import Block
 
 class Grid:
     def __init__(self):
-        self.grid = [[0 for _ in range(5)] for _ in range(5)]
+        self.grid = [[0 for _ in range(80)] for _ in range(80)]
         self.unblocked = deque()
 
 
     def init_start(self):
-        x_start = random.randint(0,5)
-        y_start = random.randint(0,5)
+        x_start = random.randint(0,len(self.grid) - 1)
+        y_start = random.randint(0,len(self.grid) - 1)
         start_block = Block(x_start, y_start)
         self.grid[x_start][y_start] = 1
         self.unblocked.append(start_block)
@@ -18,24 +18,19 @@ class Grid:
     
     def create_maze(self):
         start = self.init_start()
-        visited = deque()
+        visited = set()
         print(f"start: ({start.x}, {start.y})")
         self.dfs(start, visited)
         # for row in self.grid:
         #     print(' '.join(map(str, row)))
 
     def dfs(self, start_block, visited):
-
-        if (start_block in visited) or (start_block.x <0) or (start_block.y <0) or (start_block.x > 100) or  (start_block.y > 100):
+        print(len(visited))
+        if (start_block in visited) or (start_block.x <0) or (start_block.y <0) or (start_block.x > len(self.grid) - 1) or  (start_block.y > len(self.grid) - 1):
             return
-        if start_block in visited:
-            print(f"here")
-            print(start_block.x, start_block.y)
-        
+      
         print(f"Visiting: ({start_block.x}, {start_block.y})")
-        visited.append(start_block)
-        # for bl in visited:
-        #     print(bl.x, bl.y)
+        visited.add(start_block)
 
         blockedness = random.choices([0,1], weights = [0.7, 0.3])[0]
 
