@@ -8,6 +8,8 @@ class Grid:
     def __init__(self):
         self.grid = [[0 for _ in range(50)] for _ in range(50)]
         self.unblocked = deque()
+        self.start = Block()
+        self.target = Block()
 
     def display_grid(self):
         plt.ioff() 
@@ -24,9 +26,10 @@ class Grid:
         return start_block
     
     def create_maze(self):
-        start = self.init_start()
+        self.start = self.init_start()
         visited = set()
-        self.dfs(start, visited)
+        self.dfs(self.start, visited)
+        self.target = self.unblocked.pop()
 
 
     def dfs(self, start_block, visited):
