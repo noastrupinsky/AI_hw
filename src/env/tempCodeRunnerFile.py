@@ -1,1 +1,0 @@
-random.choices([0,1], weights = [0.7, 0.3])[0]
