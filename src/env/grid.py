@@ -33,14 +33,14 @@ class Grid:
 
 
     def dfs(self, start_block, visited):
-        if (start_block in visited) or (start_block.x <0) or (start_block.y <0) or (start_block.x > len(self.grid) - 1) or  (start_block.y > len(self.grid) - 1):
+        if (start_block in visited) or (start_block.location.x <0) or (start_block.location.y <0) or (start_block.location.x > len(self.grid) - 1) or  (start_block.location.y > len(self.grid) - 1):
             return
       
         visited.add(start_block)
 
         blockedness = random.choices([0,1], weights = [0.7, 0.3])[0]
 
-        self.grid[start_block.x][start_block.y] = blockedness
+        self.grid[start_block.location.x][start_block.location.y] = blockedness
 
         if blockedness == 0:
             self.unblocked.append(start_block)
@@ -49,7 +49,7 @@ class Grid:
         random.shuffle(nswe)
 
         for change_x, change_y in nswe:
-            self.dfs(Block(start_block.x+change_x, start_block.y+change_y), visited)
+            self.dfs(Block(start_block.location.x+change_x, start_block.location.y+change_y), visited)
         
 if __name__ == "__main__":
     sys.setrecursionlimit(10300)

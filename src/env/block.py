@@ -1,6 +1,7 @@
 from collections import deque
 class Block:
-    def __init__(self, x, y):
+ 
+    def __init__(self, x = 0, y = 0):
         self.location = Location(x,y)
         self.g = 0
         self.h = 0
