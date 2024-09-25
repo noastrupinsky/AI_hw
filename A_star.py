@@ -12,8 +12,8 @@ class A_star:
         self.c = self.max_g + 1
 
     def getManhattanDistance(self, currPos, target):
-        xDiff = abs(currPos.location.x - target.location.x)
-        yDiff = abs(currPos.location.y - target.location.y)
+        xDiff = abs(currPos.location[0] - target.location[0])
+        yDiff = abs(currPos.location[1] - target.location[1])
 
         return xDiff + yDiff
     
@@ -30,8 +30,7 @@ class A_star:
             return sucessor2
 
     def get_adjacent_nodes(self, grid, current_node):
-        x = current_node.location.x
-        y = current_node.location.y
+        x, y = current_node.location
         neighbors = deque()
         if(x-1 > 0):
             neighbors.append(Block(x-1, y))
@@ -45,33 +44,48 @@ class A_star:
 
     def a_star(self, grid, start_node, goal_node):
         open_list = []
-        closed_list = deque()
+        closed_list = set()
         heapq.heappush(open_list, (0, start_node))
         
         while not (not open_list):
             current_node = heapq.heappop(open_list)
+            current_node = current_node[1]
             if current_node == goal_node:
                     break
-            closed_list.append(current_node) #whenever claculating g, call updateMaxG for tie breaking
+            closed_list.add(current_node) #whenever claculating g, call updateMaxG for tie breaking
             print(closed_list)
             neighbors = current_node.get_adjacent_nodes(grid)
             for neighbor in neighbors:
                if neighbor in closed_list:
                    continue
-               if grid[neighbor.location.x][neighbor.location.y] == 1:
+               if grid[neighbor.location[0]][neighbor.location[1]] == 1:
                    neighbor.h = float('inf') 
+                   continue
                else:
                     neighbor.h = neighbor.getManhattanDistance(goal_node)
                neighbor.g = current_node.g + 1 #not sure if this is correct
-               if neighbor.location in [already_exists.location for already_exists in open_list]:
-                    existing_block = next(node for node in open_list if node.position == neighbor.location)
-                    if neighbor.f >= existing_block.f :
+               if neighbor.location in [already_exists[1].location for already_exists in open_list]:
+                    existing_block = next(already_exists for already_exists in open_list if already_exists[1].location == neighbor.location)
+                    if neighbor.f >= existing_block[1].f :
                         continue
                if neighbor.location in [already_exists.location for already_exists in closed_list]:
                     existing_block = next(node for node in open_list if node.position == neighbor.location)
                     if neighbor.f >= existing_block.f :
                         continue
                heapq.heappush(open_list, (neighbor.f, neighbor))
+
+if __name__ == "__main__":
+    grid = [[0, 0, 0, 0, 0],
+            [0, 1, 0, 1, 0],
+            [0, 0, 0, 0, 0],
+            [0, 1, 1, 1, 0],
+            [0, 0, 0, 0, 0]]
+    
+    start_node = Block(0, 0)
+    goal_node = Block(4, 4)
+
+    astar = A_star()
+    astar.a_star(grid, start_node, goal_node)
                 
 
 
