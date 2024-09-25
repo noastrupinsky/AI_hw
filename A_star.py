@@ -1,4 +1,4 @@
-from env.block import Block
+from src.env.block import Block
 import heapq
 from collections import deque
 
@@ -12,8 +12,8 @@ class A_star:
         self.c = self.max_g + 1
 
     def getManhattanDistance(self, currPos, target):
-        xDiff = abs(currPos.x - target.x)
-        yDiff = abs(currPos.y - target.y)
+        xDiff = abs(currPos.location.x - target.location.x)
+        yDiff = abs(currPos.location.y - target.location.y)
 
         return xDiff + yDiff
     
@@ -30,8 +30,8 @@ class A_star:
             return sucessor2
 
     def get_adjacent_nodes(self, grid, current_node):
-        x = current_node.x
-        y = current_node.y
+        x = current_node.location.x
+        y = current_node.location.y
         neighbors = deque()
         if(x-1 > 0):
             neighbors.append(Block(x-1, y))
@@ -53,16 +53,26 @@ class A_star:
             if current_node == goal_node:
                     break
             closed_list.append(current_node) #whenever claculating g, call updateMaxG for tie breaking
+            print(closed_list)
             neighbors = current_node.get_adjacent_nodes(grid)
             for neighbor in neighbors:
                if neighbor in closed_list:
                    continue
-               neighbor.h = neighbor.getManhattanDistance(goal_node)
-               neighbor.g = current_node.g + 1 #this is definately not true but I'm ignoring that for now
-               if neighbor in open_list:
-                   if neighbor.g <= neighbor.f: #this is not the correct comparrison
-                       continue
-                       
+               if grid[neighbor.location.x][neighbor.location.y] == 1:
+                   neighbor.h = float('inf') 
+               else:
+                    neighbor.h = neighbor.getManhattanDistance(goal_node)
+               neighbor.g = current_node.g + 1 #not sure if this is correct
+               if neighbor.location in [already_exists.location for already_exists in open_list]:
+                    existing_block = next(node for node in open_list if node.position == neighbor.location)
+                    if neighbor.f >= existing_block.f :
+                        continue
+               if neighbor.location in [already_exists.location for already_exists in closed_list]:
+                    existing_block = next(node for node in open_list if node.position == neighbor.location)
+                    if neighbor.f >= existing_block.f :
+                        continue
+               heapq.heappush(open_list, (neighbor.f, neighbor))
+                
 
 
 
