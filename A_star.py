@@ -29,19 +29,6 @@ class A_star:
         else:    
             return sucessor2
 
-    def get_adjacent_nodes(self, grid, current_node):
-        x, y = current_node.location
-        neighbors = deque()
-        if(x-1 > 0):
-            neighbors.append(Block(x-1, y))
-        if(x+1<len(grid) - 1):
-            neighbors.append(Block(x+1, y))
-        if(y-1 > 0):
-            neighbors.append(Block(x, y-1))
-        if(y+1<len(grid) - 1):
-            neighbors.append(Block(x, y-1))
-        return neighbors
-
     def a_star(self, grid, start_node, goal_node):
         open_list = []
         closed_list = set()
@@ -54,12 +41,12 @@ class A_star:
                     break
             closed_list.add(current_node) #whenever claculating g, call updateMaxG for tie breaking
             print(closed_list)
-            neighbors = current_node.get_adjacent_nodes(grid)
+            neighbors = current_node.get_adjacent_nodes(grid, current_node)
             for neighbor in neighbors:
                if neighbor in closed_list:
                    continue
                if grid[neighbor.location[0]][neighbor.location[1]] == 1:
-                   neighbor.h = float('inf') 
+                   neighbor.h = float('inf')
                    continue
                else:
                     neighbor.h = neighbor.getManhattanDistance(goal_node)

@@ -1,4 +1,4 @@
-
+from collections import deque
 class Block:
     def __init__(self, x, y):
         self.location = Location(x,y)
@@ -11,6 +11,19 @@ class Block:
     
     def __hash__(self):
         return hash((self.location.x, self.location.x))
+    
+    def get_adjacent_nodes(self, grid, current_node):
+        x, y = current_node.location
+        neighbors = deque()
+        if(x-1 > 0):
+            neighbors.append(Block(x-1, y))
+        if(x+1<len(grid) - 1):
+            neighbors.append(Block(x+1, y))
+        if(y-1 > 0):
+            neighbors.append(Block(x, y-1))
+        if(y+1<len(grid) - 1):
+            neighbors.append(Block(x, y-1))
+        return neighbors
 
 class Location:
     def __init__(self, x, y):
