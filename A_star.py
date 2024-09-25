@@ -10,12 +10,6 @@ class A_star:
     def updateMaxG(self, curr_g):
         self.max_g = max(self.max_g, curr_g)
         self.c = self.max_g + 1
-
-    def getManhattanDistance(self, currPos, target):
-        xDiff = abs(currPos.location[0] - target.location[0])
-        yDiff = abs(currPos.location[1] - target.location[1])
-
-        return xDiff + yDiff
     
     def tieBreaker(self, sucessor1, sucessor2):
         f1, g1 = sucessor1
@@ -41,18 +35,18 @@ class A_star:
                     break
             closed_list.add(current_node) #whenever claculating g, call updateMaxG for tie breaking
             print(closed_list)
-            neighbors = current_node.get_adjacent_nodes(grid, current_node)
+            neighbors = current_node.get_adjacent_nodes(grid)
             for neighbor in neighbors:
                if neighbor in closed_list:
                    continue
-               if grid[neighbor.location[0]][neighbor.location[1]] == 1:
+               if grid[neighbor.location.x][neighbor.location.y] == 1:
                    neighbor.h = float('inf')
                    continue
                else:
                     neighbor.h = neighbor.getManhattanDistance(goal_node)
                neighbor.g = current_node.g + 1 #not sure if this is correct
                if neighbor.location in [already_exists[1].location for already_exists in open_list]:
-                    existing_block = next(already_exists for already_exists in open_list if already_exists[1].location == neighbor.location)
+                    existing_block = next(already_exists for already_exists in open_list if already_exists.y.location == neighbor.location)
                     if neighbor.f >= existing_block[1].f :
                         continue
                if neighbor.location in [already_exists.location for already_exists in closed_list]:

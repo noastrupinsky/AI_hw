@@ -13,8 +13,9 @@ class Block:
     def __hash__(self):
         return hash((self.location.x, self.location.x))
     
-    def get_adjacent_nodes(self, grid, current_node):
-        x, y = current_node.location
+    def get_adjacent_nodes(self, grid):
+        x = self.location.x
+        y = self.location.y
         neighbors = deque()
         if(x-1 > 0):
             neighbors.append(Block(x-1, y))
@@ -25,6 +26,12 @@ class Block:
         if(y+1<len(grid) - 1):
             neighbors.append(Block(x, y-1))
         return neighbors
+    
+    def getManhattanDistance(self, target):
+        xDiff = abs(self.location.x - target.location.x)
+        yDiff = abs(self.location.y - target.location.y)
+
+        return xDiff + yDiff
 
 class Location:
     def __init__(self, x, y):
