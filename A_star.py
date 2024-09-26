@@ -26,7 +26,7 @@ class A_star:
     def a_star(self, grid, start_node, goal_node):
         open_list = []
         closed_list = set()
-        heapq.heappush(open_list, (0, start_node))
+        heapq.heappush(open_list, start_node)
         
         while not (not open_list):
             current_node = heapq.heappop(open_list)
@@ -50,28 +50,26 @@ class A_star:
                     existing_block = next(node for node in open_list if node.position == neighbor.location)
                     if neighbor.f >= existing_block.f :
                         continue
-               heapq.heappush(open_list, (neighbor.f, neighbor))
+               heapq.heappush(open_list, neighbor)
+        return closed_list
 
     def repeated_forward_a_star(self, grid, start_node, goal_node):
-        tempGrid = [[0 for _ in range(50)] for _ in range(50)]
+        tempGrid = [[0 for _ in range(len(grid))] for _ in range(len(grid))]
         current_node = start_node
         while current_node is not goal_node:
-            a_star_path = A_star.a_star(tempGrid, current_node, start_node)
+            a_star_path = self.a_star(tempGrid, current_node, goal_node)
             
             if not a_star_path:
                 return #no answer
             for block in a_star_path:
                 if block is goal_node:
                     return
-                if grid[block.location.x, block.location.y] == 1:
+                if grid[block.location.x][block.location.y] == 1:
                     block.f = float('inf')
-                    tempGrid[block.location.x, block.location.y] = 1
+                    tempGrid[block.location.x][block.location.y] = 1
                     current_node = block
-                    break
-
-
-
-        
+                    break 
+        return a_star_path
         
 if __name__ == "__main__":
     grid = [[0, 0, 0, 0, 0],
@@ -86,7 +84,7 @@ if __name__ == "__main__":
     astar = A_star()
 
     tempGrid = [[0 for _ in range(5)] for _ in range(5)]
-    path = astar.a_star(tempGrid, start_node, goal_node)
+    path = astar.repeated_forward_a_star(grid, start_node, goal_node)
 
     for block in path:
         print(block.location.x, block.location.y)
