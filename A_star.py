@@ -34,7 +34,7 @@ class A_star:
             if current_node == goal_node:
                     break
             closed_list.add(current_node) #whenever claculating g, call updateMaxG for tie breaking
-            print(closed_list)
+            # print(closed_list)
             neighbors = current_node.get_adjacent_nodes(grid)
             for neighbor in neighbors:
                if neighbor in closed_list:
@@ -45,6 +45,7 @@ class A_star:
                else:
                     neighbor.h = neighbor.getManhattanDistance(goal_node)
                neighbor.g = current_node.g + 1 #not sure if this is correct
+               neighbor.f = neighbor.g + neighbor.h
                if neighbor.location in [already_exists[1].location for already_exists in open_list]:
                     existing_block = next(already_exists for already_exists in open_list if already_exists.y.location == neighbor.location)
                     if neighbor.f >= existing_block[1].f :

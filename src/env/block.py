@@ -10,6 +10,11 @@ class Block:
     def __eq__(self, other):
         return isinstance(other, Block) and self.location.x == other.location.x and self.location.y == other.location.y
     
+    def __lt__(self, other):
+        if isinstance(other, Block):
+            return self.f < other.f
+        return NotImplemented
+    
     def __hash__(self):
         return hash((self.location.x, self.location.x))
     
