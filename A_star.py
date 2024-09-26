@@ -34,7 +34,6 @@ class A_star:
             if current_node == goal_node:
                     break
             closed_list.add(current_node) #whenever claculating g, call updateMaxG for tie breaking
-            # print(closed_list)
             neighbors = current_node.get_adjacent_nodes(grid)
             for neighbor in neighbors:
                if neighbor in closed_list:
@@ -87,7 +86,10 @@ if __name__ == "__main__":
     astar = A_star()
 
     tempGrid = [[0 for _ in range(5)] for _ in range(5)]
-    astar.a_star(tempGrid, start_node, goal_node)
+    path = astar.a_star(tempGrid, start_node, goal_node)
+
+    for block in path:
+        print(block.location.x, block.location.y)
                 
 
 
