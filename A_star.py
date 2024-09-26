@@ -54,22 +54,68 @@ class A_star:
         return closed_list
 
     def repeated_forward_a_star(self, grid, start_node, goal_node):
-        tempGrid = [[0 for _ in range(len(grid))] for _ in range(len(grid))]
+        tempGrid = [[0 for _ in range(len(grid))] for _ in range(len(grid))] #create tempGrid
+        final_path = deque()
         current_node = start_node
-        while current_node is not goal_node:
-            a_star_path = self.a_star(tempGrid, current_node, goal_node)
+        while current_node is not goal_node: #while we have not reached the goal
+            unblocked, blocked = current_node.get_adjacent_nodes(grid)
+            for coordinate in blocked: #identify in the tempGrid the neighbors that we know are blocked
+                tempGrid[coordinate.location.x][coordinate.location.y] = 1
+            a_star_path_end_to_start = self.a_star(tempGrid, current_node, goal_node) #do A* with the info we have
+
+            if not a_star_path_end_to_start: #if there's no path we have no answer
+                return
             
-            if not a_star_path:
-                return #no answer
-            for block in a_star_path:
+            a_star_path_start_to_end = deque() #walk up the tree so that I know what all the nodes are
+            while a_star_path_end_to_start:
+                a_star_path_start_to_end.append(a_star_path_end_to_start)
+                a_star_path_end_to_start = a_star_path_end_to_start.parent
+                
+            index = len(a_star_path_start_to_end)
+            while index > 0: #traverse the path that A* gave us in the right direction
+                block = a_star_path_start_to_end[index]
                 if block is goal_node:
+                    final_path.append(block)
                     return
-                if grid[block.location.x][block.location.y] == 1:
-                    block.f = float('inf')
-                    tempGrid[block.location.x][block.location.y] = 1
-                    current_node = block
-                    break 
-        return a_star_path
+                if grid[block.location.x][block.location.y] == 1: #if the path encounters an impediment
+                    current_node = a_star_path_start_to_end[-1] #set the node that we will do A* on in the next iteration to be the one before the blocked one on the path
+                    break
+                final_path.append(block)
+                index+=1
+
+        return final_path
+    
+    def repeated_backward_a_star(self, grid, start_node, goal_node):
+        tempGrid = [[0 for _ in range(len(grid))] for _ in range(len(grid))] #create tempGrid
+        final_path = deque()
+        current_node = goal_node
+        while current_node is not start_node: #while we have not reached the goal
+            unblocked, blocked = current_node.get_adjacent_nodes(grid)
+            for coordinate in blocked: #identify in the tempGrid the neighbors that we know are blocked
+                tempGrid[coordinate.location.x][coordinate.location.y] = 1
+            a_star_path_end_to_start = self.a_star(tempGrid, goal_node, current_node) #do A* with the info we have
+
+            if not a_star_path_end_to_start: #if there's no path we have no answer
+                return
+            
+            while a_star_path_end_to_start:
+                if block is start_node:
+                    return
+                final_path.append(a_star_path_end_to_start)
+                a_star_path_end_to_start = a_star_path_end_to_start.parent
+            
+                #traverse the path that A* gave us
+                if current_node is start_node: #first checks the first node independently of the rest. this way we can check the rest in terms of current_node.next so if i find an impediment i know which block comes before it
+                    final_path.append(current_node)
+                    return
+                final_path.append(current_node)
+                while current_node.parent: 
+                    if grid[current_node.parent.location.x][current_node.parent.location.y] == 1: #if the path encounters an impediment
+                        break
+                final_path.append(current_node.parent)
+                current_node = current_node.parent
+
+        return final_path
         
 if __name__ == "__main__":
     grid = [[0, 0, 0, 0, 0],
