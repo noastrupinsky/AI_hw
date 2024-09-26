@@ -39,9 +39,6 @@ class A_star:
             for neighbor in neighbors:
                if neighbor in closed_list:
                    continue
-               if grid[neighbor.location.x][neighbor.location.y] == 1:
-                   neighbor.h = float('inf')
-                   continue
                else:
                     neighbor.h = neighbor.getManhattanDistance(goal_node)
                neighbor.g = current_node.g + 1 #not sure if this is correct
@@ -56,7 +53,7 @@ class A_star:
                         continue
                heapq.heappush(open_list, (neighbor.f, neighbor))
 
-    def repeated_a_star(self, grid, start_node, goal_node):
+    def repeated_forward_a_star(self, grid, start_node, goal_node):
         tempGrid = [[0 for _ in range(50)] for _ in range(50)]
         current_node = start_node
         while current_node is not goal_node:
@@ -88,7 +85,9 @@ if __name__ == "__main__":
     goal_node = Block(4, 4)
 
     astar = A_star()
-    astar.a_star(grid, start_node, goal_node)
+
+    tempGrid = [[0 for _ in range(5)] for _ in range(5)]
+    astar.a_star(tempGrid, start_node, goal_node)
                 
 
 
