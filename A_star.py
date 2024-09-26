@@ -55,6 +55,27 @@ class A_star:
                         continue
                heapq.heappush(open_list, (neighbor.f, neighbor))
 
+    def repeated_a_star(self, grid, start_node, goal_node):
+        tempGrid = [[0 for _ in range(50)] for _ in range(50)]
+        current_node = start_node
+        while current_node is not goal_node:
+            a_star_path = A_star.a_star(tempGrid, current_node, start_node)
+            
+            if not a_star_path:
+                return #no answer
+            for block in a_star_path:
+                if block is goal_node:
+                    return
+                if grid[block.location.x, block.location.y] == 1:
+                    block.f = float('inf')
+                    tempGrid[block.location.x, block.location.y] = 1
+                    current_node = block
+                    break
+
+
+
+        
+        
 if __name__ == "__main__":
     grid = [[0, 0, 0, 0, 0],
             [0, 1, 0, 1, 0],
