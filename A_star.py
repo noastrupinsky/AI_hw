@@ -55,8 +55,6 @@ class A_star:
                         continue
                heapq.heappush(open_list, (neighbor.f, neighbor))
 
-        return closed_list
-
 if __name__ == "__main__":
     grid = [[0, 0, 0, 0, 0],
             [0, 1, 0, 1, 0],
