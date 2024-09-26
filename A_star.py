@@ -34,7 +34,6 @@ class A_star:
             if current_node == goal_node:
                     break
             closed_list.add(current_node) #whenever claculating g, call updateMaxG for tie breaking
-            # print(closed_list)
             neighbors = current_node.get_adjacent_nodes(grid)
             for neighbor in neighbors:
                if neighbor in closed_list:
@@ -56,6 +55,8 @@ class A_star:
                         continue
                heapq.heappush(open_list, (neighbor.f, neighbor))
 
+        return closed_list
+
 if __name__ == "__main__":
     grid = [[0, 0, 0, 0, 0],
             [0, 1, 0, 1, 0],
@@ -67,7 +68,10 @@ if __name__ == "__main__":
     goal_node = Block(4, 4)
 
     astar = A_star()
-    astar.a_star(grid, start_node, goal_node)
+    path = astar.a_star(grid, start_node, goal_node)
+
+    for block in path:
+        print(block.location.x, block.location.y)
                 
 
 

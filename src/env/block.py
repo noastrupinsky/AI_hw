@@ -29,7 +29,7 @@ class Block:
         if(y-1 > 0):
             neighbors.append(Block(x, y-1))
         if(y+1<len(grid) - 1):
-            neighbors.append(Block(x, y-1))
+            neighbors.append(Block(x, y+1))
         return neighbors
     
     def getManhattanDistance(self, target):
