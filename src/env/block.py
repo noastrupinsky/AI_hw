@@ -52,6 +52,37 @@ class Block:
 
         return (neighbors, blocked_neighbors)
     
+    def get_adjacent_nodes_for_repeated_astar(self, grid):
+        x = self.location.x
+        y = self.location.y
+        grid_size = len(grid.grid)
+
+        neighbors = deque()
+        blocked_neighbors = deque()
+
+        if x-1 > -1:
+            if grid.grid[x-1][y] == 0:
+                 neighbors.append(Block(x-1, y))
+            else:   
+                blocked_neighbors.append(Location(x-1, y))
+        if x+1 < grid_size:
+            if grid.grid[x+1][y] == 0:
+                neighbors.append(Block(x+1, y))
+            else: 
+                blocked_neighbors.append(Location(x+1, y))
+        if y-1 > -1:
+            if grid.grid[x][y-1] == 0:
+                neighbors.append(Block(x, y-1))
+            else: 
+                blocked_neighbors.append(Location(x, y-1))
+        if(y+1 < grid_size):
+            if grid.grid[x][y+1] == 0:
+                neighbors.append(Block(x, y+1))
+            else: 
+                blocked_neighbors.append(Location(x, y+1))
+
+        return (neighbors, blocked_neighbors)
+    
     def getManhattanDistance(self, target):
         xDiff = abs(self.location.x - target.location.x)
         yDiff = abs(self.location.y - target.location.y)

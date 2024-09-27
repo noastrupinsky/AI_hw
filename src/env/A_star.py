@@ -1,7 +1,9 @@
 from block import Block
+from grid import Grid
 import heapq
 from collections import deque
 from tiebreaker import TieBreaker
+import sys
 
 class A_star:
     def a_star(self, temp_grid, start_node, goal_node):
@@ -55,12 +57,12 @@ class A_star:
         return closed_list
 
     def repeated_forward_a_star(self, grid, start_node, goal_node):
-        tempGrid = [[0 for _ in range(len(grid))] for _ in range(len(grid))] #create tempGrid
+        tempGrid = [[0 for _ in range(len(grid.grid))] for _ in range(len(grid.grid))] #create tempGrid
         final_path = deque()
         final_path.append(start_node)
         current_node = start_node
         while current_node is not goal_node: #while we have not reached the goal
-            unblocked, blocked = current_node.get_adjacent_nodes(grid)
+            unblocked, blocked = current_node.get_adjacent_nodes_for_repeated_astar(grid)
             for coordinate in blocked: #identify in the tempGrid the neighbors that we know are blocked
                 tempGrid[coordinate.x][coordinate.y] = 1
 
@@ -85,7 +87,7 @@ class A_star:
                 if block == goal_node:
                     final_path.append(block)
                     return final_path
-                if grid[block.location.x][block.location.y] == 1: #if the path encounters an impediment
+                if grid.grid[block.location.x][block.location.y] == 1: #if the path encounters an impediment
                     current_node = reversedPath[index] #set the node that we will do A* on in the next iteration to be the one before the blocked one on the path
                     reversedPath.clear()
                     break
@@ -96,7 +98,7 @@ class A_star:
         return final_path
     
     def repeated_backward_a_star(self, grid, start_node, goal_node):
-        tempGrid = [[0 for _ in range(len(grid))] for _ in range(len(grid))] #create tempGrid
+        tempGrid = [[0 for _ in range(len(grid.grid))] for _ in range(len(grid.grid))] #create tempGrid
         final_path = deque()
         final_path.append(start_node)
         current_node = start_node
@@ -127,7 +129,7 @@ class A_star:
                 if block == goal_node:
                     final_path.append(block)
                     return final_path
-                if grid[block.location.x][block.location.y] == 1: #if the path encounters an impediment
+                if grid.grid[block.location.x][block.location.y] == 1: #if the path encounters an impediment
                     current_node = reversedPath[index-1] #set the node that we will do A* on in the next iteration to be the one before the blocked one on the path
                     reversedPath.clear()
                     break
@@ -138,18 +140,18 @@ class A_star:
         return final_path
     
 if __name__ == "__main__":
-    grid = [[0, 1, 0, 0, 0],
-            [0, 1, 0, 1, 0],
-            [0, 0, 0, 0, 0],
-            [1, 1, 1, 1, 0],
-            [0, 0, 0, 0, 0]]
+    # grid = [[0, 1, 0, 0, 0],
+    #         [0, 1, 0, 1, 0],
+    #         [0, 0, 0, 0, 0],
+    #         [1, 1, 1, 1, 0],
+    #         [0, 0, 0, 0, 0]]
         
-    start_node = Block(0, 0)
-    goal_node = Block(4, 4)
+    # start_node = Block(0, 0)
+    # goal_node = Block(4, 4)
 
+    grid = Grid()
     astar = A_star()
 
-    tempGrid = [[0 for _ in range(5)] for _ in range(5)]
     # path = astar.a_star(grid, start_node, goal_node)
     # endNode = path.pop()
     
@@ -157,9 +159,11 @@ if __name__ == "__main__":
     # while endNode:
     #     reversedPath.append(endNode)
     #     endNode = endNode.parent
-           
-    reversedPath = astar.repeated_backward_a_star(grid, start_node, goal_node)
-
+    sys.setrecursionlimit(10300)
+    grid.create_maze()
+    grid.save_grid(2)       
+    reversedPath = astar.repeated_forward_a_star(grid, grid.start, grid.target)
+    grid.color_path(reversedPath)
     while reversedPath:
         node = reversedPath.pop()
         print(node.location.x, node.location.y)     

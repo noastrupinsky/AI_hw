@@ -5,10 +5,11 @@ import matplotlib.pyplot as plt
 from block import Block
 import sys
 import os
+import numpy as np
 
 class Grid:
     def __init__(self):
-        self.grid = [[0 for _ in range(50)] for _ in range(50)]
+        self.grid = [[0 for _ in range(101)] for _ in range(101)]
         self.unblocked = deque()
         self.start = Block()
         self.target = Block()
@@ -18,6 +19,60 @@ class Grid:
         plt.imshow(self.grid, cmap='binary', interpolation='nearest')
         plt.axis('off')  # Turn off the axis
         plt.show()
+
+    # def color_path(self, reversedPath):
+    #     plt.ioff()  # Turn off interactive mode
+    #     # Create a copy of the grid to modify for coloring
+    #     color_grid = np.array(self.grid)  # Convert your grid to a NumPy array for easy manipulation
+
+    #     # Loop through the reversed path to change the cells to red
+    #     while reversedPath:
+    #         node = reversedPath.pop()
+    #         color_grid[node.location.x, node.location.y] = 2  # Change cell value to 2 for red
+    #         print(node.location.x, node.location.y)  # Print the coordinates of the node
+
+    #     # Define a custom colormap
+    #     cmap = plt.cm.colors.ListedColormap([ 'white', 'black', 'red'])  # Black for 0, White for 1, Red for 2
+
+    #     plt.imshow(color_grid, cmap=cmap, interpolation='nearest')  # Display the modified grid
+    #     plt.axis('off')  # Hide the axis
+    #     plt.colorbar(ticks=[0, 1, 2], label='Cell Values')  # Optional: show a color bar
+    #     plt.show()
+
+
+
+    def color_path(self, reversedPath):
+        plt.ioff()  # Turn off interactive mode
+        # Create a copy of the grid to modify for coloring
+        color_grid = np.array(self.grid)  # Convert your grid to a NumPy array for easy manipulation
+
+        # Check if reversedPath has nodes
+        path_length = len(reversedPath)
+        if path_length == 0:
+            print("No path to color.")
+            return
+
+        # Get the first and last node
+        first_node = reversedPath[0]
+        last_node = reversedPath[-1]
+
+        # Loop through the reversed path to change the cells
+        for index, node in enumerate(reversedPath):
+            if node is first_node:
+                color_grid[node.location.x, node.location.y] = 3  # Change cell value to 3 for green (first node)
+            elif node is last_node:
+                color_grid[node.location.x, node.location.y] = 3  # Change cell value to 3 for green (last node)
+            else:
+                color_grid[node.location.x, node.location.y] = 2  # Change cell value to 2 for red (middle nodes)
+
+        # Define a custom colormap
+        cmap = plt.cm.colors.ListedColormap(['white', 'black', 'green', 'red'])  # White for 0, Black for 1, Green for 3, Red for 2
+
+        plt.imshow(color_grid, cmap=cmap, interpolation='nearest')  # Display the modified grid
+        plt.axis('off')  # Hide the axis
+        plt.colorbar(ticks=[0, 1, 2, 3], label='Cell Values')  # Optional: show a color bar
+        plt.show()
+
 
     def init_start(self):
         x_start = random.randint(0,len(self.grid) - 1)
@@ -74,17 +129,17 @@ class Grid:
                     # Split the line into integers and append it as a new row to the grid
                     row = list(map(int, stripped_line.split()))
                     self.grid.append(row)
-        
+
 
 if __name__ == "__main__":
     sys.setrecursionlimit(10300)
-    # grid = Grid()
-    # grid.create_maze() 
-    # grid.display_grid()
-    # grid.save_grid(1)
-    grid2 = Grid()
-    grid2.get_grid(1)
-    grid2.display_grid() #when i display it after i take it out of the text file it's weirdly shrunken but same pattern
+    grid = Grid()
+    grid.create_maze() 
+    grid.display_grid()
+    grid.save_grid(1)
+    # grid2 = Grid()
+    # grid2.get_grid(1)
+    # grid2.display_grid() #when i display it after i take it out of the text file it's weirdly shrunken but same pattern
 
       
 
