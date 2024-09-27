@@ -20,27 +20,6 @@ class Grid:
         plt.axis('off')  # Turn off the axis
         plt.show()
 
-    # def color_path(self, reversedPath):
-    #     plt.ioff()  # Turn off interactive mode
-    #     # Create a copy of the grid to modify for coloring
-    #     color_grid = np.array(self.grid)  # Convert your grid to a NumPy array for easy manipulation
-
-    #     # Loop through the reversed path to change the cells to red
-    #     while reversedPath:
-    #         node = reversedPath.pop()
-    #         color_grid[node.location.x, node.location.y] = 2  # Change cell value to 2 for red
-    #         print(node.location.x, node.location.y)  # Print the coordinates of the node
-
-    #     # Define a custom colormap
-    #     cmap = plt.cm.colors.ListedColormap([ 'white', 'black', 'red'])  # Black for 0, White for 1, Red for 2
-
-    #     plt.imshow(color_grid, cmap=cmap, interpolation='nearest')  # Display the modified grid
-    #     plt.axis('off')  # Hide the axis
-    #     plt.colorbar(ticks=[0, 1, 2], label='Cell Values')  # Optional: show a color bar
-    #     plt.show()
-
-
-
     def color_path(self, reversedPath):
         plt.ioff()  # Turn off interactive mode
         # Create a copy of the grid to modify for coloring
@@ -86,8 +65,12 @@ class Grid:
         self.start = self.init_start()
         visited = set()
         self.dfs(self.start, visited)
-        self.target = self.unblocked.pop()
+        
 
+    def create_start_and_goal(self):
+        start_and_end = random.sample(self.unblocked, 2)
+        self.start = start_and_end[0]
+        self.target = start_and_end[1]
 
     def dfs(self, start_block, visited):
         if (start_block in visited) or (start_block.location.x <0) or (start_block.location.y <0) or (start_block.location.x > len(self.grid) - 1) or  (start_block.location.y > len(self.grid) - 1):

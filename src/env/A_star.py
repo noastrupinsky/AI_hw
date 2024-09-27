@@ -161,7 +161,9 @@ if __name__ == "__main__":
     #     endNode = endNode.parent
     sys.setrecursionlimit(10300)
     grid.create_maze()
-    grid.save_grid(2)       
+    grid.save_grid(2)
+    # grid.get_grid(2)
+    grid.create_start_and_goal()       
     reversedPath = astar.repeated_forward_a_star(grid, grid.start, grid.target)
     grid.color_path(reversedPath)
     while reversedPath:
