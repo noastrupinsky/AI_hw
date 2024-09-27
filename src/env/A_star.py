@@ -55,27 +55,50 @@ class A_star:
         return closed_list
 
     def repeated_forward_a_star(self, grid, start_node, goal_node):
-        tempGrid = [[0 for _ in range(len(grid))] for _ in range(len(grid))]
+        tempGrid = [[0 for _ in range(len(grid))] for _ in range(len(grid))] #create tempGrid
+        final_path = deque()
         current_node = start_node
-        while current_node is not goal_node:
-            a_star_path = self.a_star(tempGrid, current_node, goal_node)
+        while current_node is not goal_node: #while we have not reached the goal
+            unblocked, blocked = current_node.get_adjacent_nodes(grid)
+            for coordinate in blocked: #identify in the tempGrid the neighbors that we know are blocked
+                tempGrid[coordinate.x][coordinate.y] = 1
+
+            path = self.a_star(tempGrid, current_node, goal_node) #do A* with the info we have
+
+            if not path: #if there's no path we have no answer
+                return
             
-            if not a_star_path:
-                return #no answer
-            for block in a_star_path:
-                if block is goal_node:
-                    return
-                if grid[block.location.x][block.location.y] == 1:
-                    block.f = float('inf')
-                    tempGrid[block.location.x][block.location.y] = 1
-                    current_node = block
-                    break 
-        return a_star_path
+            endNode = path.pop()
+            
+            reversedPath = deque()
+            while endNode:
+                reversedPath.append(endNode)
+                endNode = endNode.parent
+        
+            for node in path:
+                node.parent = None
+
+            index = len(reversedPath)
+                
+            index = len(reversedPath)
+            while index > 0: #traverse the path that A* gave us in the right direction
+                block = reversedPath[index-1]
+                if block == goal_node:
+                    final_path.append(block)
+                    return final_path
+                if grid[block.location.x][block.location.y] == 1: #if the path encounters an impediment
+                    current_node = reversedPath[index] #set the node that we will do A* on in the next iteration to be the one before the blocked one on the path
+                    reversedPath.clear()
+                    break
+                final_path.append(block)
+                index-=1
+
+        return final_path
     
         
 if __name__ == "__main__":
     grid = [[0, 1, 0, 0, 0],
-            [1, 1, 0, 1, 0],
+            [0, 1, 0, 1, 0],
             [0, 0, 0, 0, 0],
             [1, 1, 1, 1, 0],
             [0, 0, 0, 0, 0]]
@@ -86,14 +109,16 @@ if __name__ == "__main__":
     astar = A_star()
 
     tempGrid = [[0 for _ in range(5)] for _ in range(5)]
-    path = astar.a_star(grid, start_node, goal_node)
-    endNode = path.pop()
+    # path = astar.a_star(grid, start_node, goal_node)
+    # endNode = path.pop()
     
-    reversedPath = deque()
-    while endNode:
-        reversedPath.append(endNode)
-        endNode = endNode.parent
+    # reversedPath = deque()
+    # while endNode:
+    #     reversedPath.append(endNode)
+    #     endNode = endNode.parent
            
+    reversedPath = astar.repeated_forward_a_star(grid, start_node, goal_node)
+
     while reversedPath:
         node = reversedPath.pop()
         print(node.location.x, node.location.y)     
