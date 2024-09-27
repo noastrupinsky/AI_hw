@@ -4,6 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from block import Block
 import sys
+import os
+
 class Grid:
     def __init__(self):
         self.grid = [[0 for _ in range(50)] for _ in range(50)]
@@ -51,11 +53,40 @@ class Grid:
         for change_x, change_y in nswe:
             self.dfs(Block(start_block.location.x+change_x, start_block.location.y+change_y), visited)
         
+    def save_grid(self, x):
+        folder = "grid_worlds"
+        os.makedirs(folder, exist_ok=True)
+        file_name = f'grid_{x}.txt'
+        file_path = os.path.join(folder, file_name)
+        with open(file_path, 'w') as file:
+            for row in self.grid:
+                file.write(' '.join(map(str, row)) + '\n')
+
+    def get_grid(self, x):
+        folder = "grid_worlds"
+        file_name = f'grid_{x}.txt'
+        file_path = os.path.join(folder, file_name)
+        with open(file_path, 'r') as file:
+            for line in file:
+                # Strip whitespace from the line and check if it's not empty
+                stripped_line = line.strip()
+                if stripped_line:  # Only process non-empty lines
+                    # Split the line into integers and append it as a new row to the grid
+                    row = list(map(int, stripped_line.split()))
+                    self.grid.append(row)
+        
+
 if __name__ == "__main__":
     sys.setrecursionlimit(10300)
-    grid = Grid()
-    grid.create_maze()          
-    grid.display_grid()    
+    # grid = Grid()
+    # grid.create_maze() 
+    # grid.display_grid()
+    # grid.save_grid(1)
+    grid2 = Grid()
+    grid2.get_grid(1)
+    grid2.display_grid() #when i display it after i take it out of the text file it's weirdly shrunken but same pattern
+
+      
 
 
 
