@@ -24,6 +24,7 @@ class A_star:
             if current_node == goal_node:
                 print("found goal")
                 break
+
             
             neighbors, blocked_neighbors = current_node.get_adjacent_nodes(temp_grid) #pass in the grid size so that we can check that we arent "overflowing"
 
@@ -53,7 +54,7 @@ class A_star:
                 
                 heapq.heappush(open_list, neighbor)
                 f_lookup_table[neighbor] = (neighbor.f, neighbor.g)
-        
+
         return closed_list
 
     def repeated_forward_a_star(self, grid, start_node, goal_node):
@@ -62,13 +63,14 @@ class A_star:
         final_path.append(start_node)
         current_node = start_node
         while current_node is not goal_node: #while we have not reached the goal
-            unblocked, blocked = current_node.get_adjacent_nodes_for_repeated_astar(grid)
+            unblocked, blocked = current_node.get_adjacent_nodes(grid.grid)
             for coordinate in blocked: #identify in the tempGrid the neighbors that we know are blocked
                 tempGrid[coordinate.x][coordinate.y] = 1
-
+            print("Doing A star")
             path = self.a_star(tempGrid, current_node, goal_node) #do A* with the info we have
 
-            if not path: #if there's no path we have no answer
+            if goal_node not in path: #if there's no path we have no answer
+                print("No path")
                 return
             
             endNode = path.pop()
@@ -92,6 +94,9 @@ class A_star:
                     reversedPath.clear()
                     break
                 if block != current_node:
+                    unblocked_neighbor, blocked_neighbor = block.get_adjacent_nodes(grid.grid) #I added this so that the grid is updated even when the agent doesn't bump into stuff
+                    for coordinate in blocked_neighbor: #identify in the tempGrid the neighbors that we know are blocked
+                        tempGrid[coordinate.x][coordinate.y] = 1
                     final_path.append(block)
                 index-=1
 
@@ -103,13 +108,14 @@ class A_star:
         final_path.append(start_node)
         current_node = start_node
         while current_node is not goal_node: #while we have not reached the goal
-            unblocked, blocked = current_node.get_adjacent_nodes(grid)
+            unblocked, blocked = current_node.get_adjacent_nodes(grid.grid)
             for coordinate in blocked: #identify in the tempGrid the neighbors that we know are blocked
                 tempGrid[coordinate.x][coordinate.y] = 1
-
+            print("Doing A star")
             path = self.a_star(tempGrid, goal_node, current_node) #do A* with the info we have
 
-            if not path: #if there's no path we have no answer
+            if current_node not in path: #if there's no path we have no answer
+                print("No path")
                 return
             
             endNode = path.pop()
@@ -134,24 +140,28 @@ class A_star:
                     reversedPath.clear()
                     break
                 if block != current_node:
+                    unblocked_neighbor, blocked_neighbor = block.get_adjacent_nodes(grid.grid) #I added this so that the grid is updated even when the agent doesn't bump into stuff
+                    for coordinate in blocked_neighbor: #identify in the tempGrid the neighbors that we know are blocked
+                        tempGrid[coordinate.x][coordinate.y] = 1
                     final_path.append(block)
                 index+=1
 
         return final_path
     
 if __name__ == "__main__":
-    # grid = [[0, 1, 0, 0, 0],
-    #         [0, 1, 0, 1, 0],
-    #         [0, 0, 0, 0, 0],
-    #         [1, 1, 1, 1, 0],
-    #         [0, 0, 0, 0, 0]]
+    grid1 = [[0, 1, 0, 0, 0],
+            [0, 1, 0, 1, 0],
+            [0, 0, 1, 1, 0],
+            [0, 1, 1, 1, 0],
+            [0, 0, 1, 0, 0]]
         
-    # start_node = Block(0, 0)
-    # goal_node = Block(4, 4)
+    start_node = Block(0, 0)
+    goal_node = Block(4, 4)
 
     grid = Grid()
     astar = A_star()
 
+    #testing A* plain:
     # path = astar.a_star(grid, start_node, goal_node)
     # endNode = path.pop()
     
@@ -159,18 +169,30 @@ if __name__ == "__main__":
     # while endNode:
     #     reversedPath.append(endNode)
     #     endNode = endNode.parent
+    
+    #testing using grid1:
+    # grid.grid =  grid1      
+    # grid.start = start_node
+    # grid.target = goal_node
+    # reversedPath = astar.repeated_backward_a_star(grid, grid.start, grid.target)
+    # if reversedPath: 
+    #     grid.color_path(reversedPath)
+    #     while reversedPath:
+    #         node = reversedPath.pop()
+    #         print(node.location.x, node.location.y)  
+
+    #testing using a generated grid:
     sys.setrecursionlimit(10300)
     grid.create_maze()
     grid.save_grid(2)
     # grid.get_grid(2)
-    grid.create_start_and_goal()       
+    grid.create_start_and_goal()
     reversedPath = astar.repeated_forward_a_star(grid, grid.start, grid.target)
-    grid.color_path(reversedPath)
-    while reversedPath:
-        node = reversedPath.pop()
-        print(node.location.x, node.location.y)     
-
-
+    if reversedPath: 
+        grid.color_path(reversedPath)
+        while reversedPath:
+            node = reversedPath.pop()
+            print(node.location.x, node.location.y)
 
 
 

@@ -52,6 +52,14 @@ class Grid:
         plt.colorbar(ticks=[0, 1, 2, 3], label='Cell Values')  # Optional: show a color bar
         plt.show()
 
+        for index, node in enumerate(reversedPath): #done for testing purposes
+            if node is first_node:
+                color_grid[node.location.x, node.location.y] = 0  # Change cell value to 3 for green (first node)
+            elif node is last_node:
+                color_grid[node.location.x, node.location.y] = 0  # Change cell value to 3 for green (last node)
+            else:
+                color_grid[node.location.x, node.location.y] = 0  # Change cell value to 2 for red (middle nodes)
+
 
     def init_start(self):
         x_start = random.randint(0,len(self.grid) - 1)
