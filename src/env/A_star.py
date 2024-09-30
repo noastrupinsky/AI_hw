@@ -8,15 +8,17 @@ import sys
 expanded_nodes = 0
 
 class A_star:
+    f_lookup_table = {}
+    
     def a_star(self, temp_grid, start_node, goal_node):
-        f_lookup_table = {}
+        
         open_list = [] 
         closed_list = deque()
 
     
         heapq.heappush(open_list, start_node) #add start to open list
         start_node_h = start_node.getManhattanDistance(goal_node)
-        f_lookup_table[start_node] = (start_node_h, 0, start_node_h)
+        A_star.f_lookup_table[start_node] = (start_node_h, 0, start_node_h)
         start_node.f = start_node_h
         
         while open_list:
@@ -34,7 +36,7 @@ class A_star:
             #the neighbors only include possible actions (already pruned)
             for neighbor in neighbors:
                 neighbor.parent = current_node
-                f_current, g_current, h_current = f_lookup_table[current_node]
+                f_current, g_current, h_current = A_star.f_lookup_table[current_node]
 
                 neighbor_h = neighbor.getManhattanDistance(goal_node)  #set huristic
                 neighbor.g = g_current + 1 
@@ -42,20 +44,20 @@ class A_star:
                 neighbor.f = neighbor.g + neighbor_h
 
                 if neighbor in open_list:
-                    if f_lookup_table[neighbor][0] <= neighbor.f:
+                    if A_star.f_lookup_table[neighbor][0] <= neighbor.f:
                         continue
                     else:
                         open_list.remove(neighbor)
                         
                 if neighbor in closed_list:
-                   if f_lookup_table[neighbor][0] <= neighbor.f:
+                   if A_star.f_lookup_table[neighbor][0] <= neighbor.f:
                     continue
                    else:
                     closed_list.remove(neighbor)
                 
                 
                 heapq.heappush(open_list, neighbor)
-                f_lookup_table[neighbor] = (neighbor.f, neighbor.g, neighbor_h)
+                A_star.f_lookup_table[neighbor] = (neighbor.f, neighbor.g, neighbor_h)
 
         return closed_list
 
@@ -182,6 +184,9 @@ class A_star:
         if len(path) is not 0:
             for node in path:
                 node.g = current_max_g - node.g
+                
+    def clear_lookup_table(self):
+        A_star.f_lookup_table = {}
         
         
 
