@@ -17,7 +17,7 @@ class A_star:
 
     
         heapq.heappush(open_list, start_node) #add start to open list
-        start_node_h = start_node.getManhattanDistance(goal_node)
+        start_node_h = A_star.f_lookup_table[start_node][2] if A_star.f_lookup_table[start_node]  else start_node.getManhattanDistance(goal_node)
         A_star.f_lookup_table[start_node] = (start_node_h, 0, start_node_h)
         start_node.f = start_node_h
         
@@ -38,7 +38,7 @@ class A_star:
                 neighbor.parent = current_node
                 f_current, g_current, h_current = A_star.f_lookup_table[current_node]
 
-                neighbor_h = neighbor.getManhattanDistance(goal_node)  #set huristic
+                neighbor_h =  A_star.f_lookup_table[neighbor][2] if A_star.f_lookup_table[neighbor]  else neighbor.getManhattanDistance(goal_node)  #set huristic
                 neighbor.g = g_current + 1 
                 TieBreaker().updateMaxG(neighbor.g)
                 neighbor.f = neighbor.g + neighbor_h
