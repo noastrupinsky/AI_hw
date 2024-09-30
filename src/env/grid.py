@@ -9,7 +9,7 @@ import numpy as np
 
 class Grid:
     def __init__(self):
-        self.grid = [[0 for _ in range(101)] for _ in range(101)]
+        self.grid = [[0 for _ in range(50)] for _ in range(50)]
         self.unblocked = deque()
         self.start = Block()
         self.target = Block()
@@ -19,6 +19,8 @@ class Grid:
         plt.imshow(self.grid, cmap='binary', interpolation='nearest')
         plt.axis('off')  # Turn off the axis
         plt.show()
+    
+        # Optionally, you can save the figure or leave it open for viewing
 
     def color_path(self, reversedPath):
         plt.ioff()  # Turn off interactive mode
@@ -51,14 +53,77 @@ class Grid:
         plt.axis('off')  # Hide the axis
         plt.colorbar(ticks=[0, 1, 2, 3], label='Cell Values')  # Optional: show a color bar
         plt.show()
+        
 
         for index, node in enumerate(reversedPath): #done for testing purposes
             if node is first_node:
-                color_grid[node.location.x, node.location.y] = 0  # Change cell value to 3 for green (first node)
+                color_grid[node.location.x, node.location.y] = 2  # Change cell value to 3 for green (first node)
             elif node is last_node:
                 color_grid[node.location.x, node.location.y] = 0  # Change cell value to 3 for green (last node)
             else:
                 color_grid[node.location.x, node.location.y] = 0  # Change cell value to 2 for red (middle nodes)
+    
+    
+ 
+
+    def color_paths(self, reversedPath1, reversedPath2):
+        plt.ioff()  # Turn off interactive mode
+        
+        # Create copies of the grid to modify for coloring each path
+        color_grid1 = np.array(self.grid)  # Convert your grid to a NumPy array for easy manipulation
+        color_grid2 = np.array(self.grid)  # Create a second copy of the grid
+        
+        def color_grid_with_path(color_grid, reversedPath):
+            """Helper function to color the grid based on the given path."""
+            # Check if the path has nodes
+            path_length = len(reversedPath)
+            if path_length == 0:
+                print("No path to color.")
+                return color_grid
+
+            # Get the first and last node
+            start_node = reversedPath[-1]  # Start node is the last node in the reversed path
+            end_node = reversedPath[0]  # End node is the first node in the reversed path
+
+            # Loop through the reversed path to change the cells
+            for index, node in enumerate(reversedPath):
+                if node is start_node:
+                    color_grid[node.location.x, node.location.y] = 4  # Unique value for start node (e.g., blue)
+                elif node is end_node:
+                    color_grid[node.location.x, node.location.y] = 3  # Change cell value to 3 for green (end node)
+                else:
+                    color_grid[node.location.x, node.location.y] = 2  # Change cell value to 2 for red (middle nodes)
+            return color_grid
+        
+        # Color both grids based on the respective paths
+        color_grid1 = color_grid_with_path(color_grid1, reversedPath1)
+        color_grid2 = color_grid_with_path(color_grid2, reversedPath2)
+
+        # Define a custom colormap with a new color for the start node
+        cmap = plt.cm.colors.ListedColormap(['white', 'black', 'red', 'green', 'blue'])  # Blue for start node (4)
+
+        # Create subplots
+        fig, axes = plt.subplots(1, 2, figsize=(12, 6))  # 1 row, 2 columns for side-by-side plots
+
+        # Plot the first path
+        im1 = axes[0].imshow(color_grid1, cmap=cmap, interpolation='nearest')
+        axes[0].axis('off')  # Hide axis for the first plot
+        path1_length = len(reversedPath1)  # Number of expanded nodes
+        axes[0].set_title(f"Prioritize Large G\nExpanded Nodes: {path1_length}", fontsize=12)
+
+        # Plot the second path
+        im2 = axes[1].imshow(color_grid2, cmap=cmap, interpolation='nearest')
+        axes[1].axis('off')  # Hide axis for the second plot
+        path2_length = len(reversedPath2)  # Number of expanded nodes
+        axes[1].set_title(f"Prioritize Small G\nExpanded Nodes: {path2_length}", fontsize=12)
+
+        # Optional: Add colorbars to show cell values for each subplot
+        fig.colorbar(im1, ax=axes[0], ticks=[0, 1, 2, 3, 4], label='Cell Values')
+        fig.colorbar(im2, ax=axes[1], ticks=[0, 1, 2, 3, 4], label='Cell Values')
+
+        plt.tight_layout()
+        plt.show()
+    
 
 
     def init_start(self):
@@ -83,7 +148,7 @@ class Grid:
     def dfs(self, start_block, visited):
         if (start_block in visited) or (start_block.location.x <0) or (start_block.location.y <0) or (start_block.location.x > len(self.grid) - 1) or  (start_block.location.y > len(self.grid) - 1):
             return
-      
+    
         visited.add(start_block)
 
         blockedness = random.choices([0,1], weights = [0.7, 0.3])[0]

@@ -22,7 +22,6 @@ class A_star:
             closed_list.append(current_node) #add to path
 
             if current_node == goal_node:
-                print("found goal")
                 break
 
             
@@ -66,7 +65,7 @@ class A_star:
             unblocked, blocked = current_node.get_adjacent_nodes(grid.grid)
             for coordinate in blocked: #identify in the tempGrid the neighbors that we know are blocked
                 tempGrid[coordinate.x][coordinate.y] = 1
-            print("Doing A star")
+                
             path = self.a_star(tempGrid, current_node, goal_node) #do A* with the info we have
 
             if goal_node not in path: #if there's no path we have no answer
@@ -111,7 +110,6 @@ class A_star:
             unblocked, blocked = current_node.get_adjacent_nodes(grid.grid)
             for coordinate in blocked: #identify in the tempGrid the neighbors that we know are blocked
                 tempGrid[coordinate.x][coordinate.y] = 1
-            print("Doing A star")
             path = self.a_star(tempGrid, goal_node, current_node) #do A* with the info we have
 
             if current_node not in path: #if there's no path we have no answer
@@ -149,14 +147,21 @@ class A_star:
         return final_path
     
 if __name__ == "__main__":
-    grid1 = [[0, 1, 0, 0, 0],
-            [0, 1, 0, 1, 0],
-            [0, 0, 1, 1, 0],
-            [0, 1, 1, 1, 0],
-            [0, 0, 1, 0, 0]]
+    grid1 = [
+       [0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
+    [1, 0, 1, 1, 1, 0, 1, 1, 1, 0],
+    [1, 0, 0, 0, 0, 0, 0, 1, 1, 0],
+    [1, 0, 1, 1, 1, 1, 0, 1, 1, 0],
+    [1, 0, 1, 1, 1, 1, 0, 0, 0, 0],
+    [1, 0, 0, 0, 0, 1, 0, 1, 1, 1],
+    [1, 1, 1, 0, 0, 1, 0, 1, 1, 0],
+    [1, 1, 1, 0, 0, 1, 0, 1, 1, 1],
+    [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+    [0, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+]
         
     start_node = Block(0, 0)
-    goal_node = Block(4, 4)
+    goal_node = Block(8, 9)
 
     grid = Grid()
     astar = A_star()
@@ -187,12 +192,24 @@ if __name__ == "__main__":
     grid.save_grid(2)
     # grid.get_grid(2)
     grid.create_start_and_goal()
+    TieBreaker().set_prioritization(True)
     reversedPath = astar.repeated_forward_a_star(grid, grid.start, grid.target)
-    if reversedPath: 
-        grid.color_path(reversedPath)
-        while reversedPath:
-            node = reversedPath.pop()
-            print(node.location.x, node.location.y)
+    # if reversedPath: 
+    #     grid.color_path(reversedPath)
+        # while reversedPath:
+        #     node = reversedPath.pop()
+            # print(node.location.x, node.location.y)
+    
+    TieBreaker().set_prioritization(False)
+    reversedPath2 = astar.repeated_forward_a_star(grid, grid.start, grid.target)
+    # if reversedPath: 
+    #     grid.color_path(reversedPath)
+        # while reversedPath:
+        #     node = reversedPath.pop()
+        
+    if reversedPath and reversedPath2:
+        grid.color_paths(reversedPath, reversedPath2)
+
 
 
 
