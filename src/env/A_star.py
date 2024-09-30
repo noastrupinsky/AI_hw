@@ -43,7 +43,6 @@ class A_star:
                 TieBreaker().updateMaxG(neighbor.g)
                 neighbor.f = neighbor.g + neighbor_h
 
-
                 if neighbor in open_list:
                     if A_star.f_lookup_table[neighbor][0] <= neighbor.f:
                         continue
