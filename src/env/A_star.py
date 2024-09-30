@@ -5,6 +5,8 @@ from collections import deque
 from tiebreaker import TieBreaker
 import sys
 
+expanded_nodes = 0
+
 class A_star:
     def a_star(self, temp_grid, start_node, goal_node):
         f_lookup_table = {}
@@ -19,10 +21,12 @@ class A_star:
         
         while open_list:
             current_node = heapq.heappop(open_list) #pop off min value from the heap
+            global expanded_nodes
+            expanded_nodes+=1 #to count the number of expanded nodes
             closed_list.append(current_node) #add to path
 
             if current_node == goal_node:
-                print("found goal")
+                # print("found goal")
                 break
 
             
@@ -66,7 +70,7 @@ class A_star:
             unblocked, blocked = current_node.get_adjacent_nodes(grid.grid)
             for coordinate in blocked: #identify in the tempGrid the neighbors that we know are blocked
                 tempGrid[coordinate.x][coordinate.y] = 1
-            print("Doing A star")
+            # print("Doing A star")
             path = self.a_star(tempGrid, current_node, goal_node) #do A* with the info we have
 
             if goal_node not in path: #if there's no path we have no answer
@@ -111,7 +115,7 @@ class A_star:
             unblocked, blocked = current_node.get_adjacent_nodes(grid.grid)
             for coordinate in blocked: #identify in the tempGrid the neighbors that we know are blocked
                 tempGrid[coordinate.x][coordinate.y] = 1
-            print("Doing A star")
+            # print("Doing A star")
             path = self.a_star(tempGrid, goal_node, current_node) #do A* with the info we have
 
             if current_node not in path: #if there's no path we have no answer
@@ -147,7 +151,33 @@ class A_star:
                 index+=1
 
         return final_path
-    
+
+    def compare_forward_backward(self): #counts the number of expanded nodes in forwards and backwards a start for a bunch mazes and calculates the avg
+        sys.setrecursionlimit(10300)
+        astar = A_star()
+        forwards_count = 0
+        backwards_count = 0
+        global expanded_nodes
+        for i in range(10):
+            grid = Grid()
+            grid.create_maze()
+            grid.create_start_and_goal()
+            astar.repeated_forward_a_star(grid, grid.start, grid.target)
+            forwards_count+=expanded_nodes
+            print(expanded_nodes)
+            expanded_nodes = 0
+            astar.repeated_backward_a_star(grid, grid.start, grid.target)
+            backwards_count+=expanded_nodes
+            print(expanded_nodes)
+            expanded_nodes = 0
+            print("Next")
+            print()
+
+        print("Forward average")
+        print(forwards_count/10)
+        print("Backward Average")
+        print(backwards_count/10)
+
 if __name__ == "__main__":
     grid1 = [[0, 1, 0, 0, 0],
             [0, 1, 0, 1, 0],
@@ -160,6 +190,8 @@ if __name__ == "__main__":
 
     grid = Grid()
     astar = A_star()
+
+    astar.compare_forward_backward()
 
     #testing A* plain:
     # path = astar.a_star(grid, start_node, goal_node)
@@ -182,17 +214,17 @@ if __name__ == "__main__":
     #         print(node.location.x, node.location.y)  
 
     #testing using a generated grid:
-    sys.setrecursionlimit(10300)
-    grid.create_maze()
-    grid.save_grid(2)
-    # grid.get_grid(2)
-    grid.create_start_and_goal()
-    reversedPath = astar.repeated_forward_a_star(grid, grid.start, grid.target)
-    if reversedPath: 
-        grid.color_path(reversedPath)
-        while reversedPath:
-            node = reversedPath.pop()
-            print(node.location.x, node.location.y)
+    # sys.setrecursionlimit(10300)
+    # grid.create_maze()
+    # grid.save_grid(2)
+    # # grid.get_grid(2)
+    # grid.create_start_and_goal()
+    # reversedPath = astar.repeated_forward_a_star(grid, grid.start, grid.target)
+    # if reversedPath: 
+    #     grid.color_path(reversedPath)
+    #     while reversedPath:
+    #         node = reversedPath.pop()
+    #         print(node.location.x, node.location.y)
 
 
 
