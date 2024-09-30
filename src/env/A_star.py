@@ -42,11 +42,12 @@ class A_star:
                 neighbor.parent = current_node
                 _, g_current, _ = A_star.f_lookup_table[current_node]
 
-                # neighbor_h =  A_star.f_lookup_table[neighbor][2] if A_star.f_lookup_table[neighbor]  else neighbor.getManhattanDistance(goal_node)  #set huristic
+                if neighbor == goal_node:
+                    print("STOP")
                 if neighbor in A_star.f_lookup_table:
                     neighbor_h = A_star.f_lookup_table[neighbor][2]
                 else:
-                    neighbor_h = start_node.getManhattanDistance(goal_node)
+                    neighbor_h = neighbor.getManhattanDistance(goal_node)
                 neighbor.g = g_current + 1 
                 TieBreaker().updateMaxG(neighbor.g)
                 neighbor.f = neighbor.g + neighbor_h
@@ -65,6 +66,8 @@ class A_star:
                 
                 
                 heapq.heappush(open_list, neighbor)
+                if neighbor == goal_node:
+                    print("GOAL")
                 A_star.f_lookup_table[neighbor] = (neighbor.f, neighbor.g, neighbor_h)
 
 
@@ -191,7 +194,6 @@ class A_star:
             f_goal, g_goal, h_goal = A_star.f_lookup_table[goal_node]
             f_node, g_node, h_node = A_star.f_lookup_table[current_node]
             A_star.f_lookup_table[current_node] = (f_node, g_node, g_goal-g_node)
-            current_node = current_node.parent
 
     def adaptive_a_star(self, grid, start_node, goal_node):
         tempGrid = [[0 for _ in range(len(grid.grid))] for _ in range(len(grid.grid))] #create tempGrid
@@ -227,7 +229,7 @@ class A_star:
                     return final_path
                 if grid.grid[block.location.x][block.location.y] == 1: #if the path encounters an impediment
                     current_node = reversedPath[index] #set the node that we will do A* on in the next iteration to be the one before the blocked one on the path
-                    self.update_h(reversedPath, goal_node)
+                    self.update_h(path, goal_node)
                     reversedPath.clear()
                     break
                 if block != current_node:
@@ -247,20 +249,15 @@ class A_star:
 
 if __name__ == "__main__":
     grid1 = [
-       [0, 0, 1, 1, 1, 0, 0, 0, 0, 0],
-    [1, 0, 1, 1, 1, 0, 1, 1, 1, 0],
-    [1, 0, 0, 0, 0, 0, 0, 1, 1, 0],
-    [1, 0, 1, 1, 1, 1, 0, 1, 1, 0],
-    [1, 0, 1, 1, 1, 1, 0, 0, 0, 0],
-    [1, 0, 0, 0, 0, 1, 0, 1, 1, 1],
-    [1, 1, 1, 0, 0, 1, 0, 1, 1, 0],
-    [1, 1, 1, 0, 0, 1, 0, 1, 1, 1],
-    [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
-    [0, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+      [0, 0, 0, 0, 0],
+      [0, 0, 0, 0, 0],
+      [0, 0, 1, 0, 0],
+      [0, 0, 1, 0, 0],
+      [0, 0, 0, 1, 0]
 ]
         
-    start_node = Block(0, 0)
-    goal_node = Block(8, 9)
+    start_node = Block(4, 2)
+    goal_node = Block(4, 4)
 
     grid = Grid()
     astar = A_star()
@@ -277,9 +274,9 @@ if __name__ == "__main__":
     #     endNode = endNode.parent
     
     #testing using grid1:
-    # grid.grid =  grid1      
-    # grid.start = start_node
-    # grid.target = goal_node
+    grid.grid =  grid1      
+    grid.start = start_node
+    grid.target = goal_node
     # reversedPath = astar.repeated_backward_a_star(grid, grid.start, grid.target)
     # if reversedPath: 
     #     grid.color_path(reversedPath)
@@ -288,11 +285,11 @@ if __name__ == "__main__":
     #         print(node.location.x, node.location.y)  
 
     #testing using a generated grid:
-    sys.setrecursionlimit(10300)
-    grid.create_maze()
-    grid.save_grid(2)
+    # sys.setrecursionlimit(10300)
+    # grid.create_maze()
+    # grid.save_grid(2)
     # grid.get_grid(2)
-    grid.create_start_and_goal()
+    # grid.create_start_and_goal()
     TieBreaker().set_prioritization(True)
     reversedPath = astar.adaptive_a_star(grid, grid.start, grid.target)
     print(expanded_nodes)
