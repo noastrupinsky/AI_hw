@@ -16,7 +16,7 @@ class A_star:
     
         heapq.heappush(open_list, start_node) #add start to open list
         start_node_h = start_node.getManhattanDistance(goal_node)
-        f_lookup_table[start_node] = (start_node_h, 0)
+        f_lookup_table[start_node] = (start_node_h, 0, start_node_h)
         start_node.f = start_node_h
         
         while open_list:
@@ -34,7 +34,7 @@ class A_star:
             #the neighbors only include possible actions (already pruned)
             for neighbor in neighbors:
                 neighbor.parent = current_node
-                f_current, g_current = f_lookup_table[current_node]
+                f_current, g_current, h_current = f_lookup_table[current_node]
 
                 neighbor_h = neighbor.getManhattanDistance(goal_node)  #set huristic
                 neighbor.g = g_current + 1 
@@ -56,7 +56,7 @@ class A_star:
                 
                 
                 heapq.heappush(open_list, neighbor)
-                f_lookup_table[neighbor] = (neighbor.f, neighbor.g)
+                f_lookup_table[neighbor] = (neighbor.f, neighbor.g, neighbor_h)
 
         return closed_list
 
