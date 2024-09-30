@@ -176,6 +176,17 @@ class A_star:
         print("Backward Average")
         print(backwards_count/10)
 
+    def adaptive_astar(self, grid):
+        final_path = deque()
+        goal_node = grid.goal_for_adaptive() #this will be the goal node for all iterations of adaptive
+        current_max_g = 0
+
+        if len(final_path) is not 0:
+            for node in final_path:
+                node.g = current_max_g - node.g
+        
+
+
 if __name__ == "__main__":
     grid1 = [
        [0, 0, 1, 1, 1, 0, 0, 0, 0, 0],

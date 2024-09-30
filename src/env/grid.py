@@ -145,6 +145,9 @@ class Grid:
         self.start = start_and_end[0]
         self.target = start_and_end[1]
 
+    def goal_for_adaptive(self):
+        self.target = random.sample(self.unblocked, 1)
+
     def dfs(self, start_block, visited):
         if (start_block in visited) or (start_block.location.x <0) or (start_block.location.y <0) or (start_block.location.x > len(self.grid) - 1) or  (start_block.location.y > len(self.grid) - 1):
             return
