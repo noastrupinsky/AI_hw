@@ -62,70 +62,118 @@ class Grid:
                 color_grid[node.location.x, node.location.y] = 0  # Change cell value to 3 for green (last node)
             else:
                 color_grid[node.location.x, node.location.y] = 0  # Change cell value to 2 for red (middle nodes)
-    
-    
- 
 
-    def color_paths(self, reversedPath1, reversedPath2):
+
+    def color_multiple_paths(self, path_infos):
+        """
+        Visualize multiple paths on the grid, coloring:
+        - Red for the path
+        - Green for the start
+        - Yellow for the target
+        - Purple for the path
+        - Black for blocked
+        - White for unblocked
+
+        Args:
+        path_infos: List of tuples, where each tuple contains the path and the number of expanded nodes
+        Example: [(path1, expanded_nodes1), (path2, expanded_nodes2), ...]
+        """
         plt.ioff()  # Turn off interactive mode
+
+        # Create a copy of the grid for visualization
+        color_grid = np.array(self.grid)  # Convert grid to NumPy array for easier manipulation
         
-        # Create copies of the grid to modify for coloring each path
-        color_grid1 = np.array(self.grid)  # Convert your grid to a NumPy array for easy manipulation
-        color_grid2 = np.array(self.grid)  # Create a second copy of the grid
+        # Helper function to color the grid based on a single path
+    
+    def color_paths_in_two_sections(self, paths_large_g, paths_small_g, titles_large_g, titles_small_g):
+        """
+        Visualize multiple paths in two sections:
+        - One section for prioritizing large G
+        - Another for prioritizing small G
         
-        def color_grid_with_path(color_grid, reversedPath):
+        Args:
+        paths_large_g: List of tuples (path, expanded_nodes) for large G prioritization.
+        paths_small_g: List of tuples (path, expanded_nodes) for small G prioritization.
+        titles_large_g: List of titles for each subplot in the large G section.
+        titles_small_g: List of titles for each subplot in the small G section.
+        """
+        plt.ioff()  # Turn off interactive mode
+
+        # Number of paths for each section
+        num_large_g = len(paths_large_g)
+        num_small_g = len(paths_small_g)
+
+        # Create a figure with subplots: 2 rows for 2 sections
+        fig, axes = plt.subplots(2, max(num_large_g, num_small_g), figsize=(12, 10))
+
+        # Set main titles for each section
+        fig.suptitle("Path Visualizations", fontsize=16)
+        
+        # Helper function to color the grid based on a single path
+        def color_grid_with_path(color_grid, path):
             """Helper function to color the grid based on the given path."""
-            # Check if the path has nodes
-            path_length = len(reversedPath)
-            if path_length == 0:
+            if not path:
                 print("No path to color.")
                 return color_grid
 
-            # Get the first and last node
-            start_node = reversedPath[-1]  # Start node is the last node in the reversed path
-            end_node = reversedPath[0]  # End node is the first node in the reversed path
+            # Color the path (excluding the start and end nodes)
+            for node in list(path)[1:-1]:  # Everything except the first and last nodes
+                color_grid[node.location.x, node.location.y] = 2  # Red for path
 
-            # Loop through the reversed path to change the cells
-            for index, node in enumerate(reversedPath):
-                if node is start_node:
-                    color_grid[node.location.x, node.location.y] = 4  # Unique value for start node (e.g., blue)
-                elif node is end_node:
-                    color_grid[node.location.x, node.location.y] = 3  # Change cell value to 3 for green (end node)
-                else:
-                    color_grid[node.location.x, node.location.y] = 2  # Change cell value to 2 for red (middle nodes)
+            # Mark the start and target points after coloring the path
+            start_node = path[0]  # Start node
+            end_node = path[-1]   # End node
+            color_grid[start_node.location.x, start_node.location.y] = 3  # Green for start
+            color_grid[end_node.location.x, end_node.location.y] = 4      # Yellow for target
+
             return color_grid
-        
-        # Color both grids based on the respective paths
-        color_grid1 = color_grid_with_path(color_grid1, reversedPath1)
-        color_grid2 = color_grid_with_path(color_grid2, reversedPath2)
 
-        # Define a custom colormap with a new color for the start node
-        cmap = plt.cm.colors.ListedColormap(['white', 'black', 'red', 'green', 'blue'])  # Blue for start node (4)
+        # Loop over paths for large G prioritization
+        for i, (path, expanded_nodes) in enumerate(paths_large_g):
+            color_grid = np.array(self.grid)  # Copy of the grid for each path
+            color_grid = color_grid_with_path(color_grid, path)
 
-        # Create subplots
-        fig, axes = plt.subplots(1, 2, figsize=(12, 6))  # 1 row, 2 columns for side-by-side plots
+            # Define a custom colormap
+            cmap = plt.cm.colors.ListedColormap(['white', 'black', 'red', 'green', 'yellow'])
 
-        # Plot the first path
-        im1 = axes[0].imshow(color_grid1, cmap=cmap, interpolation='nearest')
-        axes[0].axis('off')  # Hide axis for the first plot
-        path1_length = len(reversedPath1)  # Number of expanded nodes
-        axes[0].set_title(f"Prioritize Large G\nExpanded Nodes: {path1_length}", fontsize=12)
+            # Plot the grid for the current path in the first section
+            im = axes[0, i].imshow(color_grid, cmap=cmap, interpolation='nearest')
+            axes[0, i].axis('off')  # Hide axes
 
-        # Plot the second path
-        im2 = axes[1].imshow(color_grid2, cmap=cmap, interpolation='nearest')
-        axes[1].axis('off')  # Hide axis for the second plot
-        path2_length = len(reversedPath2)  # Number of expanded nodes
-        axes[1].set_title(f"Prioritize Small G\nExpanded Nodes: {path2_length}", fontsize=12)
+            # Create title with expanded nodes count
+            axes[0, i].set_title(f"{titles_large_g[i]}\nExpanded Nodes: {expanded_nodes}", fontsize=12)
 
-        # Optional: Add colorbars to show cell values for each subplot
-        fig.colorbar(im1, ax=axes[0], ticks=[0, 1, 2, 3, 4], label='Cell Values')
-        fig.colorbar(im2, ax=axes[1], ticks=[0, 1, 2, 3, 4], label='Cell Values')
+            # Optional: Add a colorbar for each subplot
+            fig.colorbar(im, ax=axes[0, i], ticks=[0, 1, 2, 3, 4], label='Grid Color Scheme')
 
-        plt.tight_layout()
+        # Set main title for large G section
+        axes[0, 0].set_ylabel("Prioritize Large G", fontsize=14)
+
+        # Loop over paths for small G prioritization
+        for i, (path, expanded_nodes) in enumerate(paths_small_g):
+            color_grid = np.array(self.grid)  # Copy of the grid for each path
+            color_grid = color_grid_with_path(color_grid, path)
+
+            # Define a custom colormap
+            cmap = plt.cm.colors.ListedColormap(['white', 'black', 'red', 'green', 'yellow'])
+
+            # Plot the grid for the current path in the second section
+            im = axes[1, i].imshow(color_grid, cmap=cmap, interpolation='nearest')
+            axes[1, i].axis('off')  # Hide axes
+
+            # Create title with expanded nodes count
+            axes[1, i].set_title(f"{titles_small_g[i]}\nExpanded Nodes: {expanded_nodes}", fontsize=12)
+
+            # Optional: Add a colorbar for each subplot
+            fig.colorbar(im, ax=axes[1, i], ticks=[0, 1, 2, 3, 4], label='Grid Color Scheme')
+
+        # Set main title for small G section
+        axes[1, 0].set_ylabel("Prioritize Small G", fontsize=14)
+
+        # Adjust layout for the figure
+        plt.tight_layout(rect=[0, 0.03, 1, 0.95])  # Make room for the main title
         plt.show()
-    
-
-
+        
     def init_start(self):
         x_start = random.randint(0,len(self.grid) - 1)
         y_start = random.randint(0,len(self.grid) - 1)
@@ -177,22 +225,27 @@ class Grid:
         folder = "grid_worlds"
         file_name = f'grid_{x}.txt'
         file_path = os.path.join(folder, file_name)
+        self.grid = []
         with open(file_path, 'r') as file:
-            for line in file:
+            for index_x, line in enumerate(file):
                 # Strip whitespace from the line and check if it's not empty
                 stripped_line = line.strip()
                 if stripped_line:  # Only process non-empty lines
                     # Split the line into integers and append it as a new row to the grid
                     row = list(map(int, stripped_line.split()))
+                    for index_y, block in enumerate(row):
+                        if block == 0:
+                            self.unblocked.append(Block(index_x, index_y))
                     self.grid.append(row)
+        
 
 
-if __name__ == "__main__":
-    sys.setrecursionlimit(10300)
-    grid = Grid()
-    grid.create_maze() 
-    grid.display_grid()
-    grid.save_grid(1)
+# if __name__ == "__main__":
+#     sys.setrecursionlimit(10300)
+#     grid = Grid()
+#     grid.create_maze() 
+#     grid.display_grid()
+#     grid.save_grid(1)
     # grid2 = Grid()
     # grid2.get_grid(1)
     # grid2.display_grid() #when i display it after i take it out of the text file it's weirdly shrunken but same pattern

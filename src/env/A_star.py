@@ -8,7 +8,7 @@ import sys
 expanded_nodes = 0
 
 class A_star:
-    f_lookup_table = {}
+    lookup_table = {}
     
     def a_star(self, temp_grid, start_node, goal_node):
         
@@ -17,58 +17,60 @@ class A_star:
 
     
         heapq.heappush(open_list, start_node) #add start to open list
-        # start_node_h = A_star.f_lookup_table[start_node][2] if A_star.f_lookup_table[start_node]  else start_node.getManhattanDistance(goal_node)
-        if start_node in A_star.f_lookup_table:
-            start_node_h = A_star.f_lookup_table[start_node][2]
+
+        if start_node in A_star.lookup_table:
+            start_node_h = A_star.lookup_table[start_node][2]
         else:
             start_node_h = start_node.getManhattanDistance(goal_node)
-        A_star.f_lookup_table[start_node] = (start_node_h, 0, start_node_h)
+        
         start_node.f = start_node_h
+           
+        A_star.lookup_table[start_node] = ( start_node.f, 0, start_node_h)
         
         while open_list:
             current_node = heapq.heappop(open_list) #pop off min value from the heap
+            
             global expanded_nodes
             expanded_nodes+=1 #to count the number of expanded nodes
+            
             closed_list.append(current_node) #add to path
 
             if current_node == goal_node:
                 break
 
-            
-            neighbors, blocked_neighbors = current_node.get_adjacent_nodes(temp_grid) #pass in the grid size so that we can check that we arent "overflowing"
+            neighbors, _ = current_node.get_adjacent_nodes(temp_grid) #pass in the grid size so that we can check that we arent "overflowing"
 
             #the neighbors only include possible actions (already pruned)
             for neighbor in neighbors:
                 neighbor.parent = current_node
-                _, g_current, _ = A_star.f_lookup_table[current_node]
+                
+                _, g_current, _ = A_star.lookup_table[current_node]
 
-                if neighbor == goal_node:
-                    print("STOP")
-                if neighbor in A_star.f_lookup_table:
-                    neighbor_h = A_star.f_lookup_table[neighbor][2]
+                if neighbor in A_star.lookup_table:
+                    _, _, neighbor_h = A_star.lookup_table[neighbor]
                 else:
                     neighbor_h = neighbor.getManhattanDistance(goal_node)
+                    
                 neighbor.g = g_current + 1 
-                TieBreaker().updateMaxG(neighbor.g)
                 neighbor.f = neighbor.g + neighbor_h
+                
+                TieBreaker().updateMaxG(neighbor.g)
 
                 if neighbor in open_list:
-                    if A_star.f_lookup_table[neighbor][0] <= neighbor.f:
+                    if A_star.lookup_table[neighbor][0] <= neighbor.f:
                         continue
                     else:
                         open_list.remove(neighbor)
                         
                 if neighbor in closed_list:
-                   if A_star.f_lookup_table[neighbor][0] <= neighbor.f:
+                   if A_star.lookup_table[neighbor][0] <= neighbor.f:
                     continue
                    else:
                     closed_list.remove(neighbor)
                 
                 
                 heapq.heappush(open_list, neighbor)
-                if neighbor == goal_node:
-                    print("GOAL")
-                A_star.f_lookup_table[neighbor] = (neighbor.f, neighbor.g, neighbor_h)
+                A_star.lookup_table[neighbor] = (neighbor.f, neighbor.g, neighbor_h)
 
 
         return closed_list
@@ -79,7 +81,7 @@ class A_star:
         final_path.append(start_node)
         current_node = start_node
         while current_node is not goal_node: #while we have not reached the goal
-            unblocked, blocked = current_node.get_adjacent_nodes(grid.grid)
+            _, blocked = current_node.get_adjacent_nodes(grid.grid)
             for coordinate in blocked: #identify in the tempGrid the neighbors that we know are blocked
                 tempGrid[coordinate.x][coordinate.y] = 1
                 
@@ -181,8 +183,7 @@ class A_star:
             backwards_count+=expanded_nodes
             print(expanded_nodes)
             expanded_nodes = 0
-            print("Next")
-            print()
+          
 
         print("Forward average")
         print(forwards_count/10)
@@ -190,67 +191,154 @@ class A_star:
         print(backwards_count/10)
 
     def update_h(self, path, goal_node):
+        num = 0
         for current_node in path:
-            f_goal, g_goal, h_goal = A_star.f_lookup_table[goal_node]
-            f_node, g_node, h_node = A_star.f_lookup_table[current_node]
-            A_star.f_lookup_table[current_node] = (f_node, g_node, g_goal-g_node)
+            f, g_goal, h = A_star.lookup_table[goal_node]
+            f_node, g_node, h_node = A_star.lookup_table[current_node]
+
+            A_star.lookup_table[current_node] = (f_node, g_node, g_goal-g_node)
+
 
     def adaptive_a_star(self, grid, start_node, goal_node):
         tempGrid = [[0 for _ in range(len(grid.grid))] for _ in range(len(grid.grid))] #create tempGrid
+        
         final_path = deque()
         final_path.append(start_node)
+        
         current_node = start_node
+        
         while current_node is not goal_node: #while we have not reached the goal
-            unblocked, blocked = current_node.get_adjacent_nodes(grid.grid)
+            _, blocked = current_node.get_adjacent_nodes(grid.grid)
             for coordinate in blocked: #identify in the tempGrid the neighbors that we know are blocked
                 tempGrid[coordinate.x][coordinate.y] = 1
-                
+            
             path = self.a_star(tempGrid, current_node, goal_node) #do A* with the info we have
+            
 
             if goal_node not in path: #if there's no path we have no answer
                 print("No path")
-                return
+                return path
             
-            endNode = path.pop()
+            node = path.pop()
             
             reversedPath = deque()
-            while endNode:
-                reversedPath.append(endNode)
-                endNode = endNode.parent
-        
-            for node in path:
+            while node:
+                reversedPath.append(node)
+                temp_node = node.parent
                 node.parent = None
+                node = temp_node
+                
                 
             index = len(reversedPath)
             while index > 0: #traverse the path that A* gave us in the right direction
                 block = reversedPath[index-1]
+                
                 if block == goal_node:
                     final_path.append(block)
                     return final_path
+                
                 if grid.grid[block.location.x][block.location.y] == 1: #if the path encounters an impediment
                     current_node = reversedPath[index] #set the node that we will do A* on in the next iteration to be the one before the blocked one on the path
                     self.update_h(path, goal_node)
                     reversedPath.clear()
                     break
+                
                 if block != current_node:
-                    unblocked_neighbor, blocked_neighbor = block.get_adjacent_nodes(grid.grid) #I added this so that the grid is updated even when the agent doesn't bump into stuff
+                    _, blocked_neighbor = block.get_adjacent_nodes(grid.grid) #I added this so that the grid is updated even when the agent doesn't bump into stuff
                     for coordinate in blocked_neighbor: #identify in the tempGrid the neighbors that we know are blocked
                         tempGrid[coordinate.x][coordinate.y] = 1
                     final_path.append(block)
+                    
                 index-=1
 
         return final_path
                 
     def clear_lookup_table(self):
-        A_star.f_lookup_table = {}
+        A_star.lookup_table = {}
+    
+    def perform_search(self, grid, generate_new_grids, x):
+        global expanded_nodes
+        if generate_new_grids:
+            for i in range(50):
+                grid.create_maze()
+                grid.save_grid(i)
+                
+        grid.get_grid(x)
+        grid.create_start_and_goal()
         
+        expanded_nodes = 0
+        A_star().clear_lookup_table()
         
+        TieBreaker().set_prioritization(True)
+        
+        print("Starting Adaptive")
+        adaptivePath = astar.adaptive_a_star(grid, grid.start, grid.target)
+        adaptiveNodes = expanded_nodes
+        expanded_nodes = 0
+        A_star().clear_lookup_table()
+        
+        print("Starting repeated forward")
+        repeatedForwardPath = astar.repeated_forward_a_star(grid, grid.start, grid.target)
+        repeatedForwardNodes = expanded_nodes
+        expanded_nodes = 0
+        A_star().clear_lookup_table()
+ 
+        print("Starting repeated backwards")
+        repeatedBackwardsPath = astar.repeated_backward_a_star(grid, grid.start, grid.target)
+        repeatedBackwardsNodes = expanded_nodes
+        paths_large_g = [
+            (adaptivePath, adaptiveNodes),
+            (repeatedForwardPath, repeatedForwardNodes),
+            (repeatedBackwardsPath, repeatedBackwardsNodes)
+        ]
 
+        #All same tests but with prioritizing small g
+        TieBreaker().set_prioritization(False)
+        print("Starting Adaptive")
+        expanded_nodes = 0
+        A_star().clear_lookup_table()
+        adaptivePath = astar.adaptive_a_star(grid, grid.start, grid.target)
+        adaptiveNodes = expanded_nodes
+        
+        print("Starting repeated forward")
+        expanded_nodes = 0
+        A_star().clear_lookup_table()
+        repeatedForwardPath = astar.repeated_forward_a_star(grid, grid.start, grid.target)
+        repeatedForwardNodes = expanded_nodes
+        
+        print("Starting repeated backwards")
+        expanded_nodes = 0
+        A_star().clear_lookup_table()
+        repeatedBackwardsPath = astar.repeated_backward_a_star(grid, grid.start, grid.target)
+        repeatedBackwardsNodes = expanded_nodes
+        
+        paths_small_g = [
+            (adaptivePath, adaptiveNodes),
+            (repeatedForwardPath, repeatedForwardNodes),
+            (repeatedBackwardsPath, repeatedBackwardsNodes)
+        ]
+        
+        
+        titles_large_g = [
+            "Adaptive Path (Large G)",
+            "Repeated Forward Path (Large G)",
+            "Repeated Backward Path (Large G)"
+        ]
+
+        titles_small_g = [
+            "Adaptive Path (Small G)",
+            "Repeated Forward Path (Small G)",
+            "Repeated Backward Path (Small G)"
+        ]
+        
+        grid.color_paths_in_two_sections(paths_large_g, paths_small_g, titles_large_g, titles_small_g)
+
+    
 
 if __name__ == "__main__":
     grid1 = [
       [0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0],
+      [0, 0, 1, 0, 0],
       [0, 0, 1, 0, 0],
       [0, 0, 1, 0, 0],
       [0, 0, 0, 1, 0]
@@ -261,65 +349,9 @@ if __name__ == "__main__":
 
     grid = Grid()
     astar = A_star()
-
-    # astar.compare_forward_backward()
-
-    #testing A* plain:
-    # path = astar.a_star(grid, start_node, goal_node)
-    # endNode = path.pop()
+    sys.setrecursionlimit(10300)
     
-    # reversedPath = deque()
-    # while endNode:
-    #     reversedPath.append(endNode)
-    #     endNode = endNode.parent
-    
-    #testing using grid1:
-    grid.grid =  grid1      
-    grid.start = start_node
-    grid.target = goal_node
-    # reversedPath = astar.repeated_backward_a_star(grid, grid.start, grid.target)
-    # if reversedPath: 
-    #     grid.color_path(reversedPath)
-    #     while reversedPath:
-    #         node = reversedPath.pop()
-    #         print(node.location.x, node.location.y)  
-
-    #testing using a generated grid:
-    # sys.setrecursionlimit(10300)
-    # grid.create_maze()
-    # grid.save_grid(2)
-    # grid.get_grid(2)
-    # grid.create_start_and_goal()
-    TieBreaker().set_prioritization(True)
-    reversedPath = astar.adaptive_a_star(grid, grid.start, grid.target)
-    print(expanded_nodes)
-    expanded_nodes = 0
-    if reversedPath: 
-        grid.color_path(reversedPath)
-
-    reversedPath = astar.repeated_forward_a_star(grid, grid.start, grid.target)
-    print(expanded_nodes)
-    expanded_nodes = 0
-    if reversedPath: 
-        grid.color_path(reversedPath)
-
-    # TieBreaker().set_prioritization(True)
-    # reversedPath = astar.adaptive_a_star(grid, grid.start, grid.target)
-    # # if reversedPath: 
-    # #     grid.color_path(reversedPath)
-    #     # while reversedPath:
-    #     #     node = reversedPath.pop()
-    #         # print(node.location.x, node.location.y)
-    
-    # TieBreaker().set_prioritization(False)
-    # reversedPath2 = astar.repeated_forward_a_star(grid, grid.start, grid.target)
-    # # if reversedPath: 
-    # #     grid.color_path(reversedPath)
-    #     # while reversedPath:
-    #     #     node = reversedPath.pop()
-        
-    # if reversedPath and reversedPath2:
-    #     grid.color_paths(reversedPath, reversedPath2)
+    astar.perform_search(grid, False, 1)
 
 
 
