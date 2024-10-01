@@ -10,12 +10,12 @@ expanded_nodes = 0
 class A_star:
     lookup_table = {}
     
-    def a_star(self, temp_grid, start_node, goal_node):
-        
+    def a_star(self, temp_grid, start_node, goal_node, adaptive):
+        if  adaptive == False:
+            self.clear_lookup_table()
         open_list = [] 
         closed_list = deque()
 
-    
         heapq.heappush(open_list, start_node) #add start to open list
 
         if start_node in A_star.lookup_table:
@@ -29,7 +29,7 @@ class A_star:
         
         while open_list:
             current_node = heapq.heappop(open_list) #pop off min value from the heap
-            
+
             global expanded_nodes
             expanded_nodes+=1 #to count the number of expanded nodes
             
@@ -37,7 +37,6 @@ class A_star:
 
             if current_node == goal_node:
                 break
-
             neighbors, _ = current_node.get_adjacent_nodes(temp_grid) #pass in the grid size so that we can check that we arent "overflowing"
 
             #the neighbors only include possible actions (already pruned)
@@ -49,8 +48,8 @@ class A_star:
                 if neighbor in A_star.lookup_table:
                     _, _, neighbor_h = A_star.lookup_table[neighbor]
                 else:
-                    neighbor_h = neighbor.getManhattanDistance(goal_node)
-                    
+                        neighbor_h = neighbor.getManhattanDistance(goal_node)
+
                 neighbor.g = g_current + 1 
                 neighbor.f = neighbor.g + neighbor_h
                 
@@ -66,26 +65,24 @@ class A_star:
                    if A_star.lookup_table[neighbor][0] <= neighbor.f:
                     continue
                    else:
-                    closed_list.remove(neighbor)
-                
+                    closed_list.remove(neighbor)    
                 
                 heapq.heappush(open_list, neighbor)
+
                 A_star.lookup_table[neighbor] = (neighbor.f, neighbor.g, neighbor_h)
-
-
+                # print(neighbor.location.x, neighbor.location.y) #DELETE
         return closed_list
 
-    def repeated_forward_a_star(self, grid, start_node, goal_node):
+    def repeated_forward_a_star(self, grid, current_node, goal_node):
         tempGrid = [[0 for _ in range(len(grid.grid))] for _ in range(len(grid.grid))] #create tempGrid
         final_path = deque()
-        final_path.append(start_node)
-        current_node = start_node
+        final_path.append(current_node)
         while current_node is not goal_node: #while we have not reached the goal
             _, blocked = current_node.get_adjacent_nodes(grid.grid)
             for coordinate in blocked: #identify in the tempGrid the neighbors that we know are blocked
                 tempGrid[coordinate.x][coordinate.y] = 1
                 
-            path = self.a_star(tempGrid, current_node, goal_node) #do A* with the info we have
+            path = self.a_star(tempGrid, current_node, goal_node, False) #do A* with the info we have
 
             if goal_node not in path: #if there's no path we have no answer
                 print("No path")
@@ -95,12 +92,13 @@ class A_star:
             
             reversedPath = deque()
             while endNode:
+                print(endNode.location.x, endNode.location.y)
                 reversedPath.append(endNode)
-                endNode = endNode.parent
+                temp_node = endNode.parent
+                endNode.parent = None
+                endNode = temp_node
+            print()
         
-            for node in path:
-                node.parent = None
-                
             index = len(reversedPath)
             while index > 0: #traverse the path that A* gave us in the right direction
                 block = reversedPath[index-1]
@@ -112,7 +110,7 @@ class A_star:
                     reversedPath.clear()
                     break
                 if block != current_node:
-                    unblocked_neighbor, blocked_neighbor = block.get_adjacent_nodes(grid.grid) #I added this so that the grid is updated even when the agent doesn't bump into stuff
+                    _, blocked_neighbor = block.get_adjacent_nodes(grid.grid) #I added this so that the grid is updated even when the agent doesn't bump into stuff
                     for coordinate in blocked_neighbor: #identify in the tempGrid the neighbors that we know are blocked
                         tempGrid[coordinate.x][coordinate.y] = 1
                     final_path.append(block)
@@ -120,16 +118,15 @@ class A_star:
 
         return final_path
     
-    def repeated_backward_a_star(self, grid, start_node, goal_node):
+    def repeated_backward_a_star(self, grid, current_node, goal_node):
         tempGrid = [[0 for _ in range(len(grid.grid))] for _ in range(len(grid.grid))] #create tempGrid
         final_path = deque()
-        final_path.append(start_node)
-        current_node = start_node
+        final_path.append(current_node)
         while current_node is not goal_node: #while we have not reached the goal
             unblocked, blocked = current_node.get_adjacent_nodes(grid.grid)
             for coordinate in blocked: #identify in the tempGrid the neighbors that we know are blocked
                 tempGrid[coordinate.x][coordinate.y] = 1
-            path = self.a_star(tempGrid, goal_node, current_node) #do A* with the info we have
+            path = self.a_star(tempGrid, goal_node, current_node, False) #do A* with the info we have
 
             if current_node not in path: #if there's no path we have no answer
                 print("No path")
@@ -139,11 +136,13 @@ class A_star:
             
             reversedPath = deque()
             while endNode:
+                print(endNode.location.x, endNode.location.y)
                 reversedPath.append(endNode)
-                endNode = endNode.parent
-        
-            for node in path:
-                node.parent = None
+                temp_node = endNode.parent
+                endNode.parent = None
+                endNode = temp_node
+            print()
+           
                 
             index = 0 
             end = len(reversedPath)
@@ -157,10 +156,10 @@ class A_star:
                     reversedPath.clear()
                     break
                 if block != current_node:
-                    unblocked_neighbor, blocked_neighbor = block.get_adjacent_nodes(grid.grid) #I added this so that the grid is updated even when the agent doesn't bump into stuff
+                    _, blocked_neighbor = block.get_adjacent_nodes(grid.grid) #I added this so that the grid is updated even when the agent doesn't bump into stuff
                     for coordinate in blocked_neighbor: #identify in the tempGrid the neighbors that we know are blocked
                         tempGrid[coordinate.x][coordinate.y] = 1
-                    final_path.append(block)
+                    final_path.append(block)        
                 index+=1
 
         return final_path
@@ -212,8 +211,7 @@ class A_star:
             for coordinate in blocked: #identify in the tempGrid the neighbors that we know are blocked
                 tempGrid[coordinate.x][coordinate.y] = 1
             
-            path = self.a_star(tempGrid, current_node, goal_node) #do A* with the info we have
-            
+            path = self.a_star(tempGrid, current_node, goal_node, True) #do A* with the info we have
 
             if goal_node not in path: #if there's no path we have no answer
                 print("No path")
@@ -223,12 +221,13 @@ class A_star:
             
             reversedPath = deque()
             while node:
+                print(node.location.x, node.location.y)
                 reversedPath.append(node)
                 temp_node = node.parent
                 node.parent = None
                 node = temp_node
-                
-                
+            print()
+
             index = len(reversedPath)
             while index > 0: #traverse the path that A* gave us in the right direction
                 block = reversedPath[index-1]
@@ -344,14 +343,44 @@ if __name__ == "__main__":
       [0, 0, 0, 1, 0]
 ]
         
-    start_node = Block(4, 2)
+    start_node = Block(4, 0)
     goal_node = Block(4, 4)
 
     grid = Grid()
     astar = A_star()
     sys.setrecursionlimit(10300)
+
+    # astar.compare_forward_backward()
     
-    astar.perform_search(grid, False, 1)
+    grid.grid = grid1
+    grid.start = start_node
+    grid.target = goal_node
+
+    expanded_nodes = 0
+    A_star().clear_lookup_table()
+    
+    astar.repeated_backward_a_star(grid, start_node, goal_node)
+    print("backward expanded:")
+    print(expanded_nodes)
+    print()
+
+    expanded_nodes = 0
+    A_star().clear_lookup_table()
+
+    astar.repeated_forward_a_star(grid, start_node, goal_node)
+    print("forward expanded:")
+    print(expanded_nodes)
+    print()
+
+    expanded_nodes = 0
+    A_star().clear_lookup_table()
+
+    astar.adaptive_a_star(grid, start_node, goal_node)
+    print("adaptive expanded:")
+    print(expanded_nodes)
+    print()
+
+    # astar.perform_search(grid, False, 1)
 
 
 

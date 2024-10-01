@@ -20,12 +20,11 @@ class Grid:
         plt.axis('off')  # Turn off the axis
         plt.show()
     
-        # Optionally, you can save the figure or leave it open for viewing
 
     def color_path(self, reversedPath):
-        plt.ioff()  # Turn off interactive mode
-        # Create a copy of the grid to modify for coloring
-        color_grid = np.array(self.grid)  # Convert your grid to a NumPy array for easy manipulation
+        plt.ioff()
+        
+        color_grid = np.array(self.grid) 
 
         # Check if reversedPath has nodes
         path_length = len(reversedPath)
@@ -80,10 +79,7 @@ class Grid:
         """
         plt.ioff()  # Turn off interactive mode
 
-        # Create a copy of the grid for visualization
-        color_grid = np.array(self.grid)  # Convert grid to NumPy array for easier manipulation
-        
-        # Helper function to color the grid based on a single path
+        color_grid = np.array(self.grid) 
     
     def color_paths_in_two_sections(self, paths_large_g, paths_small_g, titles_large_g, titles_small_g):
         """
