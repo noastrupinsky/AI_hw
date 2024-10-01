@@ -19,20 +19,21 @@ class A_star:
 
         heapq.heappush(open_list, start_node) #add start to open list
 
-        if start_node in A_star.lookup_table:
-            start_node_h = A_star.lookup_table[start_node][2]
+        if adaptive and start_node in A_star.lookup_table:
+            _, _, start_node_h = A_star.lookup_table[start_node]
         else:
             start_node_h = start_node.getManhattanDistance(goal_node)
         
         start_node.f = start_node_h
            
+
         A_star.lookup_table[start_node] = ( start_node.f, 0, start_node_h)
         
         while open_list:
             current_node = heapq.heappop(open_list) #pop off min value from the heap
 
             global expanded_nodes
-            expanded_nodes+=1 #to count the number of expanded nodes
+            expanded_nodes += 1 #to count the number of expanded nodes
             
             closed_list.append(current_node) #add to path
 
@@ -46,7 +47,7 @@ class A_star:
                 
                 _, g_current, _ = A_star.lookup_table[current_node]
 
-                if neighbor in A_star.lookup_table:
+                if adaptive and neighbor in A_star.lookup_table:
                     _, _, neighbor_h = A_star.lookup_table[neighbor]
                 else:
                         neighbor_h = neighbor.getManhattanDistance(goal_node)
@@ -71,7 +72,7 @@ class A_star:
                 heapq.heappush(open_list, neighbor)
 
                 A_star.lookup_table[neighbor] = (neighbor.f, neighbor.g, neighbor_h)
-                # print(neighbor.location.x, neighbor.location.y) #DELETE
+                
         return closed_list
 
     def repeated_forward_a_star(self, grid, current_node, goal_node):
@@ -93,7 +94,7 @@ class A_star:
             
             reversedPath = deque()
             while endNode:
-                print(endNode.location.x, endNode.location.y)
+                # print(endNode.location.x, endNode.location.y)
                 reversedPath.append(endNode)
                 endNode = endNode.parent
         
@@ -137,12 +138,11 @@ class A_star:
             
             reversedPath = deque()
             while endNode:
-                print(endNode.location.x, endNode.location.y)
+                # print(endNode.location.x, endNode.location.y)
                 reversedPath.append(endNode)
                 temp_node = endNode.parent
                 endNode.parent = None
                 endNode = temp_node
-            print()
            
                 
             index = 0 
@@ -222,14 +222,13 @@ class A_star:
             
             reversedPath = deque()
             while node:
-                print(node.location.x, node.location.y)
                 reversedPath.append(node)
                 temp_node = node.parent
                 node.parent = None
                 node = temp_node
                 
                 
-            index = len(reversedPath) - 1
+            index = len(reversedPath)
             while index > 0: #traverse the path that A* gave us in the right direction
                 block = reversedPath[index-1]
                 
@@ -263,11 +262,15 @@ class A_star:
                 grid.create_maze()
                 grid.save_grid(i)
                 
+        print(f"Grid: {x}" ) 
         grid.get_grid(x)
         grid.create_start_and_goal()
         
-        # grid.start = Block(19, 46)
-        # grid.target = Block(43, 43)
+        grid.start = Block(38, 48)
+        grid.target = Block(26, 0)
+        
+        print(f"Start: ({grid.start.location.x}, {grid.start.location.y})")
+        print(f"target: ({grid.target.location.x}, {grid.target.location.y})")
         expanded_nodes = 0
         A_star().clear_lookup_table()
         
@@ -345,12 +348,4 @@ if __name__ == "__main__":
     sys.setrecursionlimit(10300)
     
     random_number = random.randint(0, 49)
-    astar.perform_search(grid, False, random_number)
-
-
-
-
-        
-
-        
-        
+    astar.perform_search(grid, False, 21)

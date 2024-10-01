@@ -14,7 +14,8 @@ class Block:
     def __lt__(self, other):
         if isinstance(other, Block):
             if(self.f == other.f):
-                return TieBreaker().tieBreaker((self.f, self.g), (other.f, other.g))
+                result = TieBreaker().tieBreaker((self.f, self.g), (other.f, other.g))
+                return result
             return self.f < other.f
         return NotImplemented
     
