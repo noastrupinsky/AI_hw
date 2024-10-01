@@ -4,6 +4,7 @@ import heapq
 from collections import deque
 from tiebreaker import TieBreaker
 import sys
+import random
 
 expanded_nodes = 0
 
@@ -89,7 +90,7 @@ class A_star:
 
             if goal_node not in path: #if there's no path we have no answer
                 print("No path")
-                return
+                return path
             
             endNode = path.pop()
             
@@ -101,7 +102,7 @@ class A_star:
             for node in path:
                 node.parent = None
                 
-            index = len(reversedPath)
+            index = len(reversedPath) - 1
             while index > 0: #traverse the path that A* gave us in the right direction
                 block = reversedPath[index-1]
                 if block == goal_node:
@@ -133,7 +134,7 @@ class A_star:
 
             if current_node not in path: #if there's no path we have no answer
                 print("No path")
-                return
+                return path
             
             endNode = path.pop()
             
@@ -229,7 +230,7 @@ class A_star:
                 node = temp_node
                 
                 
-            index = len(reversedPath)
+            index = len(reversedPath) - 1
             while index > 0: #traverse the path that A* gave us in the right direction
                 block = reversedPath[index-1]
                 
@@ -266,6 +267,8 @@ class A_star:
         grid.get_grid(x)
         grid.create_start_and_goal()
         
+        # grid.start = Block(19, 46)
+        # grid.target = Block(43, 43)
         expanded_nodes = 0
         A_star().clear_lookup_table()
         
@@ -292,7 +295,7 @@ class A_star:
             (repeatedBackwardsPath, repeatedBackwardsNodes)
         ]
 
-        #All same tests but with prioritizing small g
+        # All same tests but with prioritizing small g
         TieBreaker().set_prioritization(False)
         print("Starting Adaptive")
         expanded_nodes = 0
@@ -331,27 +334,19 @@ class A_star:
             "Repeated Backward Path (Small G)"
         ]
         
-        grid.color_paths_in_two_sections(paths_large_g, paths_small_g, titles_large_g, titles_small_g)
+        grid.color_paths_in_two_sections(paths_large_g, paths_small_g, titles_large_g, titles_small_g, grid.start, grid.target)
+
 
     
 
 if __name__ == "__main__":
-    grid1 = [
-      [0, 0, 0, 0, 0],
-      [0, 0, 1, 0, 0],
-      [0, 0, 1, 0, 0],
-      [0, 0, 1, 0, 0],
-      [0, 0, 0, 1, 0]
-]
-        
-    start_node = Block(4, 2)
-    goal_node = Block(4, 4)
 
     grid = Grid()
     astar = A_star()
     sys.setrecursionlimit(10300)
     
-    astar.perform_search(grid, False, 1)
+    random_number = random.randint(0, 49)
+    astar.perform_search(grid, False, random_number)
 
 
 

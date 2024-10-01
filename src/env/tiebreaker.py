@@ -29,8 +29,8 @@ class TieBreaker:
         f1, g1 = sucessor1
         f2, g2 = sucessor2
 
-        priorityA = (self.c * f1) - g1
-        priorityB = (self.c * f2) - g2
+        priorityA = (self.c * f1) - (g1)
+        priorityB = (self.c * f2) - (g2)
 
         if self.prioritize_larger_g:
             if priorityA > priorityB:
@@ -40,4 +40,5 @@ class TieBreaker:
                 return 1
             else: 
                 return 0
+        return 0
         

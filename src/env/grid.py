@@ -63,29 +63,7 @@ class Grid:
             else:
                 color_grid[node.location.x, node.location.y] = 0  # Change cell value to 2 for red (middle nodes)
 
-
-    def color_multiple_paths(self, path_infos):
-        """
-        Visualize multiple paths on the grid, coloring:
-        - Red for the path
-        - Green for the start
-        - Yellow for the target
-        - Purple for the path
-        - Black for blocked
-        - White for unblocked
-
-        Args:
-        path_infos: List of tuples, where each tuple contains the path and the number of expanded nodes
-        Example: [(path1, expanded_nodes1), (path2, expanded_nodes2), ...]
-        """
-        plt.ioff()  # Turn off interactive mode
-
-        # Create a copy of the grid for visualization
-        color_grid = np.array(self.grid)  # Convert grid to NumPy array for easier manipulation
-        
-        # Helper function to color the grid based on a single path
-    
-    def color_paths_in_two_sections(self, paths_large_g, paths_small_g, titles_large_g, titles_small_g):
+    def color_paths_in_two_sections(self, paths_large_g, paths_small_g, titles_large_g, titles_small_g, start_node, target_node):
         """
         Visualize multiple paths in two sections:
         - One section for prioritizing large G
@@ -96,6 +74,8 @@ class Grid:
         paths_small_g: List of tuples (path, expanded_nodes) for small G prioritization.
         titles_large_g: List of titles for each subplot in the large G section.
         titles_small_g: List of titles for each subplot in the small G section.
+        start_node: The common start node for all paths.
+        target_node: The common target node for all paths.
         """
         plt.ioff()  # Turn off interactive mode
 
@@ -110,28 +90,26 @@ class Grid:
         fig.suptitle("Path Visualizations", fontsize=16)
         
         # Helper function to color the grid based on a single path
-        def color_grid_with_path(color_grid, path):
+        def color_grid_with_path(color_grid, path, start_node, target_node):
             """Helper function to color the grid based on the given path."""
             if not path:
                 print("No path to color.")
                 return color_grid
 
-            # Color the path (excluding the start and end nodes)
+            # Color the path (excluding the start and target nodes)
             for node in list(path)[1:-1]:  # Everything except the first and last nodes
                 color_grid[node.location.x, node.location.y] = 2  # Red for path
 
             # Mark the start and target points after coloring the path
-            start_node = path[0]  # Start node
-            end_node = path[-1]   # End node
             color_grid[start_node.location.x, start_node.location.y] = 3  # Green for start
-            color_grid[end_node.location.x, end_node.location.y] = 4      # Yellow for target
+            color_grid[target_node.location.x, target_node.location.y] = 4  # Yellow for target
 
             return color_grid
 
         # Loop over paths for large G prioritization
         for i, (path, expanded_nodes) in enumerate(paths_large_g):
             color_grid = np.array(self.grid)  # Copy of the grid for each path
-            color_grid = color_grid_with_path(color_grid, path)
+            color_grid = color_grid_with_path(color_grid, path, start_node, target_node)
 
             # Define a custom colormap
             cmap = plt.cm.colors.ListedColormap(['white', 'black', 'red', 'green', 'yellow'])
@@ -152,7 +130,7 @@ class Grid:
         # Loop over paths for small G prioritization
         for i, (path, expanded_nodes) in enumerate(paths_small_g):
             color_grid = np.array(self.grid)  # Copy of the grid for each path
-            color_grid = color_grid_with_path(color_grid, path)
+            color_grid = color_grid_with_path(color_grid, path, start_node, target_node)
 
             # Define a custom colormap
             cmap = plt.cm.colors.ListedColormap(['white', 'black', 'red', 'green', 'yellow'])
