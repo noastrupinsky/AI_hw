@@ -12,8 +12,8 @@ class A_star:
     h_lookup_table = {}
     lookup_table = {}
     
-    def a_star(self, temp_grid, start_node, goal_node, adaptive, backwards = False):
-
+    def a_star(self, temp_grid, start_node, goal_node, adaptive):
+        TieBreaker().reset()
         self.clear_lookup_table()
         if adaptive == False:
             self.clear_h_lookup_table()
@@ -67,7 +67,7 @@ class A_star:
                         if A_star.lookup_table[neighbor][0] < neighbor.f:
                             continue
                         else:
-                            if TieBreaker().tieBreaker(A_star.lookup_table[neighbor], (neighbor.f, neighbor.g), backwards):
+                            if TieBreaker().tieBreaker(A_star.lookup_table[neighbor], (neighbor.f, neighbor.g)):
                                 continue
                             else: 
                                 open_list.remove(neighbor)
@@ -80,7 +80,7 @@ class A_star:
                         if A_star.lookup_table[neighbor][0] < neighbor.f:
                             continue
                         else:
-                            if TieBreaker().tieBreaker(A_star.lookup_table[neighbor], (neighbor.f, neighbor.g), backwards):
+                            if TieBreaker().tieBreaker(A_star.lookup_table[neighbor], (neighbor.f, neighbor.g)):
                                 continue
                             else: 
                                 closed_list.remove(neighbor)
@@ -146,7 +146,7 @@ class A_star:
             unblocked, blocked = current_node.get_adjacent_nodes(grid.grid)
             for coordinate in blocked: #identify in the tempGrid the neighbors that we know are blocked
                 tempGrid[coordinate.x][coordinate.y] = 1
-            path = self.a_star(tempGrid, goal_node, current_node, False, True) #do A* with the info we have
+            path = self.a_star(tempGrid, goal_node, current_node, False) #do A* with the info we have
 
             if current_node not in path: #if there's no path we have no answer
                 print("No path")
@@ -288,8 +288,8 @@ class A_star:
         grid.get_grid(x)
         grid.create_start_and_goal()
         
-        # grid.start = Block(38, 48)
-        # grid.target = Block(26, 0)
+        grid.start = Block(38, 48)
+        grid.target = Block(26, 0)
         
         print(f"Start: ({grid.start.location.x}, {grid.start.location.y})")
         print(f"target: ({grid.target.location.x}, {grid.target.location.y})")
@@ -370,4 +370,4 @@ if __name__ == "__main__":
     sys.setrecursionlimit(10300)
     
     random_number = random.randint(0, 49)
-    astar.perform_search(grid, False, random_number)
+    astar.perform_search(grid, False, 21)

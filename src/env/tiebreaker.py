@@ -17,13 +17,13 @@ class TieBreaker:
     def set_prioritization(self, prioritize_larger_g_test):
         self.prioritize_larger_g = prioritize_larger_g_test
         
-    def reset(self, curr_g):
+    def reset(self):
         self.max_g = 0
         self.c = 1
     
     def updateMaxG(self, curr_g):
         self.max_g = max(self.max_g, curr_g)
-        self.c = self.max_g + 1
+        self.c = self.max_g + 10
     
     def tieBreaker(self, sucessor1, sucessor2, backwards = False):
         f1, g1 = sucessor1
@@ -33,11 +33,8 @@ class TieBreaker:
         priorityB = (self.c * f2) - (g2)
 
         if self.prioritize_larger_g:
-            result =  priorityA < priorityB
+            return priorityA <= priorityB
         else:
-            result =  priorityA > priorityB
-        
-        if backwards:
-            return not result
-        return result
+            return priorityA >= priorityB
+    
             
