@@ -9,25 +9,27 @@ import random
 expanded_nodes = 0
 
 class A_star:
+    h_lookup_table = {}
     lookup_table = {}
     
     def a_star(self, temp_grid, start_node, goal_node, adaptive):
-        if  adaptive == False:
-            self.clear_lookup_table()
+
+        self.clear_lookup_table()
+        if adaptive == False:
+            self.clear_h_lookup_table()
         open_list = [] 
         closed_list = deque()
 
         heapq.heappush(open_list, start_node) #add start to open list
 
-        if adaptive and start_node in A_star.lookup_table:
-            _, _, start_node_h = A_star.lookup_table[start_node]
+        if adaptive and start_node in A_star.h_lookup_table:
+            start_node_h = A_star.h_lookup_table[start_node]
         else:
             start_node_h = start_node.getManhattanDistance(goal_node)
         
         start_node.f = start_node_h
            
-
-        A_star.lookup_table[start_node] = ( start_node.f, 0, start_node_h)
+        A_star.lookup_table[start_node] = start_node.f, 0
         
         while open_list:
             current_node = heapq.heappop(open_list) #pop off min value from the heap
@@ -45,12 +47,12 @@ class A_star:
             for neighbor in neighbors:
                 neighbor.parent = current_node
                 
-                _, g_current, _ = A_star.lookup_table[current_node]
+                _, g_current = A_star.lookup_table[current_node]
 
-                if adaptive and neighbor in A_star.lookup_table:
-                    _, _, neighbor_h = A_star.lookup_table[neighbor]
+                if adaptive and neighbor in A_star.h_lookup_table:
+                    neighbor_h = A_star.h_lookup_table[neighbor]
                 else:
-                        neighbor_h = neighbor.getManhattanDistance(goal_node)
+                    neighbor_h = neighbor.getManhattanDistance(goal_node)
 
                 neighbor.g = g_current + 1 
                 neighbor.f = neighbor.g + neighbor_h
@@ -58,20 +60,34 @@ class A_star:
                 TieBreaker().updateMaxG(neighbor.g)
 
                 if neighbor in open_list:
-                    if A_star.lookup_table[neighbor][0] <= neighbor.f:
-                        continue
-                    else:
+                    if A_star.lookup_table[neighbor][0] > neighbor.f:
                         open_list.remove(neighbor)
+                        heapq.heapify(open_list)
+                    else:
+                        if A_star.lookup_table[neighbor][0] < neighbor.f:
+                            continue
+                        else:
+                            if TieBreaker().tieBreaker(A_star.lookup_table[neighbor], (neighbor.f, neighbor.g)):
+                                continue
+                            else: 
+                                open_list.remove(neighbor)
+                                heapq.heapify(open_list)
                         
                 if neighbor in closed_list:
-                   if A_star.lookup_table[neighbor][0] <= neighbor.f:
-                    continue
-                   else:
-                    closed_list.remove(neighbor)    
+                    if A_star.lookup_table[neighbor][0] > neighbor.f:
+                        closed_list.remove(neighbor)
+                    else:
+                        if A_star.lookup_table[neighbor][0] < neighbor.f:
+                            continue
+                        else:
+                            if TieBreaker().tieBreaker(A_star.lookup_table[neighbor], (neighbor.f, neighbor.g)):
+                                continue
+                            else: 
+                                closed_list.remove(neighbor)
+                       
                 
                 heapq.heappush(open_list, neighbor)
-
-                A_star.lookup_table[neighbor] = (neighbor.f, neighbor.g, neighbor_h)
+                A_star.lookup_table[neighbor] = (neighbor.f, neighbor.g)
                 
         return closed_list
 
@@ -101,12 +117,14 @@ class A_star:
             for node in path:
                 node.parent = None
                 
-            index = len(reversedPath) - 1
+            index = len(reversedPath)
             while index > 0: #traverse the path that A* gave us in the right direction
                 block = reversedPath[index-1]
                 if block == goal_node:
                     final_path.append(block)
                     return final_path
+                if(block.location.x == 26 and block.location.y == 32):
+                    print("HERE")
                 if grid.grid[block.location.x][block.location.y] == 1: #if the path encounters an impediment
                     current_node = reversedPath[index] #set the node that we will do A* on in the next iteration to be the one before the blocked one on the path
                     reversedPath.clear()
@@ -193,10 +211,10 @@ class A_star:
     def update_h(self, path, goal_node):
         num = 0
         for current_node in path:
-            f, g_goal, h = A_star.lookup_table[goal_node]
-            f_node, g_node, h_node = A_star.lookup_table[current_node]
+            _, g_goal = A_star.lookup_table[goal_node]
+            _, g_node = A_star.lookup_table[current_node]
 
-            A_star.lookup_table[current_node] = (f_node, g_node, g_goal-g_node)
+            A_star.h_lookup_table[current_node] = g_goal-g_node
 
 
     def adaptive_a_star(self, grid, start_node, goal_node):
@@ -235,7 +253,8 @@ class A_star:
                 if block == goal_node:
                     final_path.append(block)
                     return final_path
-                
+                if(block.location.x == 25 and block.location.y == 32):
+                    print("HERE")
                 if grid.grid[block.location.x][block.location.y] == 1: #if the path encounters an impediment
                     current_node = reversedPath[index] #set the node that we will do A* on in the next iteration to be the one before the blocked one on the path
                     self.update_h(path, goal_node)
@@ -255,6 +274,9 @@ class A_star:
     def clear_lookup_table(self):
         A_star.lookup_table = {}
     
+    def clear_h_lookup_table(self):
+        A_star.h_lookup_table = {}
+    
     def perform_search(self, grid, generate_new_grids, x):
         global expanded_nodes
         if generate_new_grids:
@@ -266,8 +288,8 @@ class A_star:
         grid.get_grid(x)
         grid.create_start_and_goal()
         
-        grid.start = Block(38, 48)
-        grid.target = Block(26, 0)
+        # grid.start = Block(38, 48)
+        # grid.target = Block(26, 0)
         
         print(f"Start: ({grid.start.location.x}, {grid.start.location.y})")
         print(f"target: ({grid.target.location.x}, {grid.target.location.y})")
@@ -348,4 +370,4 @@ if __name__ == "__main__":
     sys.setrecursionlimit(10300)
     
     random_number = random.randint(0, 49)
-    astar.perform_search(grid, False, 21)
+    astar.perform_search(grid, False, random_number)
