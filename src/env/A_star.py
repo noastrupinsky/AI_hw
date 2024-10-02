@@ -192,11 +192,11 @@ class A_star:
             grid.create_start_and_goal()
             astar.repeated_forward_a_star(grid, grid.start, grid.target)
             forwards_count+=expanded_nodes
-            print(expanded_nodes)
+            # print(expanded_nodes)
             expanded_nodes = 0
             astar.repeated_backward_a_star(grid, grid.start, grid.target)
             backwards_count+=expanded_nodes
-            print(expanded_nodes)
+            # print(expanded_nodes)
             expanded_nodes = 0
           
 
@@ -364,5 +364,7 @@ if __name__ == "__main__":
     astar = A_star()
     sys.setrecursionlimit(10300)
     
+    astar.compare_forward_backward()
+
     random_number = random.randint(0, 49)
     astar.perform_search(grid, False, random_number)
