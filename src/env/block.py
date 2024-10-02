@@ -1,5 +1,6 @@
 from collections import deque
 from tiebreaker import TieBreaker
+import random
 class Block:
  
     def __init__(self, x = 0, y = 0):
@@ -51,7 +52,8 @@ class Block:
             else: 
                 blocked_neighbors.append(Location(x, y+1))
 
-        return (neighbors, blocked_neighbors)
+        random.shuffle(list(neighbors))
+        return (deque(neighbors), blocked_neighbors)
     
     def getManhattanDistance(self, target):
         xDiff = abs(self.location.x - target.location.x)
