@@ -25,7 +25,7 @@ class TieBreaker:
         self.max_g = max(self.max_g, curr_g)
         self.c = self.max_g + 1
     
-    def tieBreaker(self, sucessor1, sucessor2):
+    def tieBreaker(self, sucessor1, sucessor2, backwards = False):
         f1, g1 = sucessor1
         f2, g2 = sucessor2
 
@@ -33,7 +33,11 @@ class TieBreaker:
         priorityB = (self.c * f2) - (g2)
 
         if self.prioritize_larger_g:
-            return priorityA < priorityB
+            result =  priorityA < priorityB
         else:
-            return priorityA > priorityB
+            result =  priorityA > priorityB
+        
+        if backwards:
+            return not result
+        return result
             
