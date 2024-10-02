@@ -110,7 +110,6 @@ class A_star:
             
             reversedPath = deque()
             while endNode:
-                # print(endNode.location.x, endNode.location.y)
                 reversedPath.append(endNode)
                 endNode = endNode.parent
         
@@ -123,8 +122,6 @@ class A_star:
                 if block == goal_node:
                     final_path.append(block)
                     return final_path
-                if(block.location.x == 26 and block.location.y == 32):
-                    print("HERE")
                 if grid.grid[block.location.x][block.location.y] == 1: #if the path encounters an impediment
                     current_node = reversedPath[index] #set the node that we will do A* on in the next iteration to be the one before the blocked one on the path
                     reversedPath.clear()
@@ -253,8 +250,6 @@ class A_star:
                 if block == goal_node:
                     final_path.append(block)
                     return final_path
-                if(block.location.x == 25 and block.location.y == 32):
-                    print("HERE")
                 if grid.grid[block.location.x][block.location.y] == 1: #if the path encounters an impediment
                     current_node = reversedPath[index] #set the node that we will do A* on in the next iteration to be the one before the blocked one on the path
                     self.update_h(path, goal_node)
