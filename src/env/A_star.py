@@ -288,8 +288,8 @@ class A_star:
         grid.get_grid(x)
         grid.create_start_and_goal()
         
-        grid.start = Block(38, 48)
-        grid.target = Block(26, 0)
+        # grid.start = Block(38, 48)
+        # grid.target = Block(26, 0)
         
         print(f"Start: ({grid.start.location.x}, {grid.start.location.y})")
         print(f"target: ({grid.target.location.x}, {grid.target.location.y})")
@@ -370,4 +370,4 @@ if __name__ == "__main__":
     sys.setrecursionlimit(10300)
     
     random_number = random.randint(0, 49)
-    astar.perform_search(grid, False, 21)
+    astar.perform_search(grid, False, random_number)
