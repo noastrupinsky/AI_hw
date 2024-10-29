@@ -364,7 +364,7 @@ if __name__ == "__main__":
     astar = A_star()
     sys.setrecursionlimit(10300)
     
-    astar.compare_forward_backward()
+    # astar.compare_forward_backward()
 
     random_number = random.randint(0, 49)
     astar.perform_search(grid, False, random_number)
