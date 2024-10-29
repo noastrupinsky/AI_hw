@@ -26,7 +26,7 @@ class Grid:
         
     def displayGrid(self):
         fig, ax = plt.subplots()
-    # Loop through each cell in the grid
+        
         for i in range(len(self.grid)):
             for j in range(len(self.grid[i])):
                 if (i, j) == self.bull:
@@ -39,10 +39,10 @@ class Grid:
                     color = 'black'  # obstacles
                 else:
                     color = 'white'  # empty space
-                # Draw a rectangle for each cell
+                
                 rect = plt.Rectangle((j, len(self.grid) - i - 1), 1, 1, facecolor=color)
                 ax.add_patch(rect)
-        # Set limits, ticks, and show grid
+                
         ax.set_xlim(0, len(self.grid[0]))
         ax.set_ylim(0, len(self.grid))
         ax.set_xticks(np.arange(0, len(self.grid[0]), 1))
@@ -55,7 +55,6 @@ class Grid:
             
 if __name__ == "__main__":
     grid = Grid()
-    # Display the grid with visual elements
     grid.displayGrid()
 
 
