@@ -30,8 +30,8 @@ class Game:
             bNextIdeas = self.getBNextIdeas(posB, cNext) #bNext returns [probability, action]
             tStarForThisCNext = 1
             for bNext in bNextIdeas:
-                tStarForThisCNext += bNext[0] * self.tStar(bNext[1], cNext)
-            if tStarForThisCNext < minTStar:
+                tStarForThisCNext += bNext[0] * self.tStar(bNext[1], cNext) #potentially prune away rounds of tStar when the probability is 0 anyways
+            if tStarForThisCNext < minTStar: #
                 minTStar = tStarForThisCNext
        
         return minTStar
@@ -49,6 +49,7 @@ class Game:
             #any place the bull is not allowed to go has probability 0
             #if there are 2 possible places to go, they each get probability 0.5
             #if there is 1 possible place to go it gets probability 1
+            #If there's nowhere for the bull to go (likely bc the robot is in the way) then return the current location with a probability of 1.
         
         #If not in 5x5:
             #Any move that isn't hitting the wall or the robot gets equal prob. Those things get prob 0.
