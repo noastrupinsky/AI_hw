@@ -1,4 +1,5 @@
-
+from game import Location
+from collections import deque
 
 class Game:
     
@@ -37,12 +38,31 @@ class Game:
         return minTStar
     
     def getCNextIdeas(self, posB, posC):
-        #check if all 8 movements are possible - not walls etc
-        cNextIdeas = []
-        return cNextIdeas
+        #check if all 8 movements are possible - not walls etc and that the bull isn't in the way
+        cNextIdeas = [Location(posC.x, posC.y-1), Location(posC.x-1, posC.y), Location(posC.x+1, posC.y), Location(posC.x, posC.y+1), Location(posC.x+1, posC.y+1), Location(posC.x-1, posC.y-1), Location(posC.x+1, posC.y-1), Location(posC.x-1, posC.y+1)]
+        cNextToReturn = deque()
+        for idea in cNextIdeas:
+            if (Location.spotAllowed(idea) == 1) & ~(idea.x == posB.x & idea.y == posB.y):
+                cNextToReturn.append(idea)
+        return cNextToReturn
     
     def getBNextIdeas(self,posB, posC):
-        bNextIdeas = []
+        bNextIdeas = [Location(posB.x, posB.y-1), Location(posB.x-1, posB.y), Location(posB.x+1, posB.y)]
+        in5x5Status = Location.inThe5by5(posB, posC)
+        currentDisance = 0
+        if in5x5Status == 1:
+            currentDistance = Location.manhattanDistance(posB, posC)
+        bNextToReturn = deque()
+        
+        for idea in bNextIdeas:
+            if Location.spotAllowed(idea) == 0:
+                bNextToReturn.append([idea, 0])
+            elif in5x5Status == 1:
+                if Location.manhattanDistance(idea, posC) > currentDistance:
+                    bNextToReturn.append([idea, 0])
+
+
+
         #figure out if we're in the 5x5
         #If in 5x5:
             #get manhattanDistanec to posC
@@ -53,5 +73,7 @@ class Game:
         
         #If not in 5x5:
             #Any move that isn't hitting the wall or the robot gets equal prob. Those things get prob 0.
+        return bNextToReturn
+    
 
-        return bNextIdeas
+        
