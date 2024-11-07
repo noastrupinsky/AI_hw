@@ -55,22 +55,25 @@ class Location:
     def __init__(self, x, y):
          self.x = x
          self.y = y
-    def spotAllowed(self, pos):
-        if pos.x > 12 | pos.x < 0 | pos.y > 12 | pos.y < 0:
-            return 0
-        if (pos.x, pos.y) == (5,5) | (pos.x, pos.y) == (6,5) | (pos.x, pos.y) == (7,5) | (pos.x, pos.y) == (7,6) | (pos.x, pos.y) == (7,7) | (pos.x, pos.y) == (6,7) | (pos.x, pos.y) == (5,7): #supposed to be the corrall but idk if i got the locations cortect
-            return 0
-        return 1
     
-    def inThe5by5(self, posB, posC):
-        if abs(posB.x-posC.x) <= 5 | abs(posB.y-posC.y) <= 5:
-            return 1
-        return 0
-    def manhattanDistance(self, posB, posC):
+    @staticmethod
+    def spotAllowed(pos):
+        if pos.x > 12 | pos.x < 0 | pos.y > 12 | pos.y < 0:
+            return False
+        if (pos.x, pos.y) == (5,5) or (pos.x, pos.y) == (5,6) or (pos.x, pos.y) == (5,7) or (pos.x, pos.y) == (6,7) or (pos.x, pos.y) == (7,7) or (pos.x, pos.y) == (7,6) or (pos.x, pos.y) == (7,5): #supposed to be the corrall but idk if i got the locations cortect
+            return False
+        return True
+    
+    @staticmethod
+    def inThe5by5(posB, posC):
+        if abs(posB.x-posC.x) <= 5 & abs(posB.y-posC.y) <= 5:
+            return True
+        return False
+    
+    @staticmethod
+    def manhattanDistance(posB, posC):
         return abs(posB.x-posC.x) + abs(posB.y-posC.y)
     
-if __name__ == "__main__":
-    grid = Grid()
-    grid.displayGrid()
+
 
 

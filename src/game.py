@@ -1,5 +1,6 @@
-from game import Location
 from collections import deque
+import sys
+from grid import Location
 
 class Game:
     
@@ -7,23 +8,10 @@ class Game:
         pass
 
     def tStar(self, posB, posC):
-        lastMoveBounds = {
-        (2, 6), (2, 7), (2, 8), (2, 9),
-        (3, 6), (3, 7), (3, 8), (3, 9),
-        (4, 6), (4, 7), (4, 8), (4, 9),
-        (5, 8), (5, 9), (6, 8), (6, 9),
-        (7, 8), (7, 9), (8, 6), (8, 7),
-        (8, 8), (8, 9), (9, 6), (9, 7),
-        (9, 8), (9, 9), (10, 6), (10, 7),
-        (10, 8), (10, 9)
-        }
+   
         if posB == (6,6):
             return 0
-        if posB == (5,6) & (posC in lastMoveBounds ):
-            return 1
-        if posB == (4,6) & (posC == (8,6)):
-            return 2
-        
+ 
         cNextIdeas = self.getCNextIdeas(posC, posB)
         minTStar = max
 
@@ -31,38 +19,43 @@ class Game:
             bNextIdeas = self.getBNextIdeas(posB, cNext) #bNext returns [probability, action]
             tStarForThisCNext = 1
             for bNext in bNextIdeas:
-                tStarForThisCNext += bNext[0] * self.tStar(bNext[1], cNext) #potentially prune away rounds of tStar when the probability is 0 anyways
+                tStarForThisCNext += self.tStar(bNext, cNext) #potentially prune away rounds of tStar when the probability is 0 anyways
             if tStarForThisCNext < minTStar: #
                 minTStar = tStarForThisCNext
        
         return minTStar
     
-    def getCNextIdeas(self, posB, posC):
+    def getCNextIdeas(self, posC, posB):
         #check if all 8 movements are possible - not walls etc and that the bull isn't in the way
         cNextIdeas = [Location(posC.x, posC.y-1), Location(posC.x-1, posC.y), Location(posC.x+1, posC.y), Location(posC.x, posC.y+1), Location(posC.x+1, posC.y+1), Location(posC.x-1, posC.y-1), Location(posC.x+1, posC.y-1), Location(posC.x-1, posC.y+1)]
         cNextToReturn = deque()
         for idea in cNextIdeas:
-            if (Location.spotAllowed(idea) == 1) & ~(idea.x == posB.x & idea.y == posB.y):
+            if Location.spotAllowed(idea) & ~(idea.x == posB.x and idea.y == posB.y):
                 cNextToReturn.append(idea)
         return cNextToReturn
     
     def getBNextIdeas(self,posB, posC):
-        bNextIdeas = [Location(posB.x, posB.y-1), Location(posB.x-1, posB.y), Location(posB.x+1, posB.y)]
+        bNextIdeas = [Location(posB.x, posB.y-1), Location(posB.x-1, posB.y), Location(posB.x+1, posB.y), Location(posB.x, posB.y+1)]
         in5x5Status = Location.inThe5by5(posB, posC)
-        currentDisance = 0
-        if in5x5Status == 1:
+        # currentDisance = 0
+        if in5x5Status:
             currentDistance = Location.manhattanDistance(posB, posC)
+            
+        potentialIdeas = deque()
         bNextToReturn = deque()
         
+        #WIP why do we return ideas that are prob zero - wont that make the recursion tree larger?
         for idea in bNextIdeas:
-            if Location.spotAllowed(idea) == 0:
-                bNextToReturn.append([idea, 0])
-            elif in5x5Status == 1:
-                if Location.manhattanDistance(idea, posC) > currentDistance:
-                    bNextToReturn.append([idea, 0])
-
-
-
+            if Location.spotAllowed(idea):
+                if in5x5Status:
+                    if Location.manhattanDistance(idea, posC) < currentDistance:
+                        bNextToReturn.append(idea)
+                else:
+                    bNextToReturn.append(idea)
+    
+        if len(bNextToReturn) == 0:
+            bNextToReturn.append(posB)
+        
         #figure out if we're in the 5x5
         #If in 5x5:
             #get manhattanDistanec to posC
@@ -75,5 +68,9 @@ class Game:
             #Any move that isn't hitting the wall or the robot gets equal prob. Those things get prob 0.
         return bNextToReturn
     
-
+if __name__ == "__main__":
+    sys.setrecursionlimit(100000)
+    game = Game()
+    result = game.tStar(Location(0, 0), Location(12, 12))
+    print(result)
         
