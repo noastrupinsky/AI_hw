@@ -1,108 +1,117 @@
 from collections import deque
 import sys
+from itertools import permutations
 from grid import Location
 
 class Game:
     
     def __init__(self) -> None:
-        self.hash_table = {}
-        self.visited = set()
-        # self.options = set()
-        # pass
-    def insertTStar(self, coord1, coord2, value):
+        self.minMoves= {}
+
+    def insertMinMoves(self, bull, robot, value):
         # Use a tuple of tuples as the key
-        self.hash_table[(coord1, coord2)] = value
+        self.minMoves[(bull, robot)] = value
     
-    def isKnownTStar(self, coord1, coord2):
-        return (coord1, coord2) in self.hash_table
+    def getStoredMinMoves(self, bull, robot):
+        if self.minMoves.get((bull, robot)) == None:
+            print("WHY")
+        return self.minMoves.get((bull, robot))
+
     
-    def getStoredTStar(self, coord1, coord2):
-        return self.hash_table.get((coord1, coord2), None)
+    def converge(self):
+        curr = self.getStoredMinMoves(Location(6, 5), Location(4, 6))
+        new = -1
+        i = 1
+        while not curr == new:
+            print(f"iteration: {i}")
+            curr = new
+            for (bull, robot) in (self.minMoves.keys()):
+                # if(bull == Location(6,5) and robot == Location(4,6)):
+                self.insertMinMoves(bull, robot, self.tStar(bull, robot))
+            new = self.getStoredMinMoves(Location(6, 5), Location(4, 6))
+            
+            print(self.getStoredMinMoves(Location(6, 5), Location(4, 6)))
+            print(" ")
+            i = i + 1
+            
     
-    def insertVisited(self, coord1, coord2):
-        self.visited.add((coord1, coord2))
+    def initStates(self):   
+        states = deque()
+        for i in range(13):
+            for j in range(13):
+                if Location.spotAllowed(Location(i, j)):
+                    states.append(Location(i, j))
         
-    def isVisited(self, coord1, coord2):
-        return (coord1, coord2) in self.visited
-    
-    # def insertOption(self, value):
-    #     self.options.add(value)
-    
-    # def resetOptions(self):
-    #     self.options.clear()
-    
-    # def findMin(self):
-    #     return min(self.options)
+        for bull, robot in permutations(states, 2):
+            if (robot == Location(6, 6) and bull == Location(6, 5)) or (robot == Location(6, 5) and bull == Location(6, 4)):
+                continue
+            if bull != robot:
+                self.insertMinMoves(bull, robot, 0)
+      
+
 
     def tStar(self, posB, posC):
-   
-        if posB.x == 6 and posB.y == 6:
+        
+        if posB == Location(6, 6):
             return 0
-        
-        self.insertVisited((posC.x, posC.y),(posB.x, posB.y))
- 
-        cNextIdeas = self.getCNextIdeas(posC, posB)
-        # self.resetOptions()
-        options = set()
-        options.add(sys.maxsize)
-        for cNext in cNextIdeas:
-            bNextIdeas = self.getBNextIdeas(posB, cNext) 
-            for bNext in bNextIdeas:
-                tStarValue = 0
-                
-                if self.isVisited((cNext.x, cNext.y),(bNext.x, bNext.y)):
-                    continue
-                if(cNext.x == bNext.x and cNext.y == bNext.y):
-                    continue
-                
-                if(self.isKnownTStar((cNext.x, cNext.y),(bNext.x, bNext.y))):
-                    tStarValue = self.getStoredTStar((cNext.x, cNext.y),(bNext.x, bNext.y))
-                else:
-                    tStarValue = self.tStar(bNext, cNext)
-                    self.insertTStar((cNext.x, cNext.y),(bNext.x, bNext.y), tStarValue)
-                    
-                # print(tStarValue)
-                options.add(tStarValue)
-       
-        return 1 + min(options)
-    
-    def getCNextIdeas(self, posC, posB):
-        #check if all 8 movements are possible - not walls etc and that the bull isn't in the way
-        cNextIdeas = [Location(posC.x, posC.y-1), Location(posC.x-1, posC.y), Location(posC.x+1, posC.y), Location(posC.x, posC.y+1), Location(posC.x+1, posC.y+1), Location(posC.x-1, posC.y-1), Location(posC.x+1, posC.y-1), Location(posC.x-1, posC.y+1)]
-        cNextToReturn = deque()
-        for idea in cNextIdeas:
-            if Location.spotAllowed(idea) and not (idea.x == posB.x and idea.y == posB.y):
-                cNextToReturn.append(idea)
-        return cNextToReturn
-    
-    def getBNextIdeas(self,posB, posC):
-        bNextIdeas = [Location(posB.x, posB.y-1), Location(posB.x-1, posB.y), Location(posB.x+1, posB.y), Location(posB.x, posB.y+1)]
-        in5x5Status = Location.inThe5by5(posB, posC)
-        # currentDisance = 0
-        if in5x5Status:
-            currentDistance = Location.manhattanDistance(posB, posC)
-            
-        # potentialIdeas = deque()
-        bNextToReturn = deque()
-        
-        #WIP why do we return ideas that are prob zero - wont that make the recursion tree larger?
-        for idea in bNextIdeas:
-            if Location.spotAllowed(idea):
-                if in5x5Status:
-                    distFromRobot = Location.manhattanDistance(idea, posC)
-                    if distFromRobot <= currentDistance:
-                        bNextToReturn.append(idea)
-                else:
-                    bNextToReturn.append(idea)
-    
-        if len(bNextToReturn) == 0:
-            bNextToReturn.append(posB)
 
-        return bNextToReturn
+        if (posC == Location(6, 6) and posB == Location(6, 5)) or (posC == Location(6, 5) and posB == Location(6, 4)):
+            return sys.maxsize
+
+        robotMoves = self.potentialRobotMoves(posC, posB)
+        options = set()
+        
+        for robotMove in robotMoves:
+            
+            bullMoves = self.potentialBullMoves(posB, robotMove) 
+            
+            for bullMove in bullMoves:
+                if robotMove == bullMove:
+                    continue
+                options.add(self.getStoredMinMoves(bullMove, robotMove))
+        return 1 + sum(options) / len(options)
+            
+    
+    def potentialRobotMoves(self, posC, posB):
+
+        moves = [Location(posC.x, posC.y-1), Location(posC.x-1, posC.y), Location(posC.x+1, posC.y), Location(posC.x, posC.y+1), Location(posC.x+1, posC.y+1), Location(posC.x-1, posC.y-1), Location(posC.x+1, posC.y-1), Location(posC.x-1, posC.y+1)]
+        
+        possibleMoves = deque()
+        
+        for move in moves:
+            if Location.spotAllowed(move) and not (move.x == posB.x and move.y == posB.y):
+                possibleMoves.append(move)
+                
+        return possibleMoves
+    
+    def potentialBullMoves(self, currBull, currRobot):
+        moves = [Location(currBull.x, currBull.y-1), Location(currBull.x-1, currBull.y), Location(currBull.x+1, currBull.y), Location(currBull.x, currBull.y+1)]
+        
+        in5x5Status = Location.inThe5by5(currBull, currRobot)
+        
+        if in5x5Status:
+            currentDistance = Location.manhattanDistance(currBull, currRobot)
+            
+        possibleMoves = deque()
+        
+        for move in moves:
+            if Location.spotAllowed(move) and Location.comboAllowed(currRobot, move):
+                if in5x5Status:
+                    distFromRobot = Location.manhattanDistance(move, currRobot)
+                    if distFromRobot <= currentDistance:
+                        possibleMoves.append(move)
+                else:
+                    possibleMoves.append(move)
+    
+        if len(possibleMoves) == 0:
+            possibleMoves.append(currBull)
+
+        return possibleMoves
     
 if __name__ == "__main__":
     sys.setrecursionlimit(100000)
     game = Game()
-    result = game.tStar(Location(0, 0), Location(12, 12))
-    print(result)
+    game.initStates()
+    game.converge()
+    # print(result)
         

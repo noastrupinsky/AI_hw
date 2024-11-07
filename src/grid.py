@@ -55,12 +55,30 @@ class Location:
     def __init__(self, x, y):
          self.x = x
          self.y = y
+
+    def __eq__(self, other):
+        if not isinstance(other, Location):
+            return False
+        return (self.x == other.x and
+                self.y == other.y)
+        
+    def __hash__(self):
+        # Combine the x and y values to create a unique hash
+        return hash((self.x, self.y))
     
     @staticmethod
     def spotAllowed(pos):
         if pos.x > 12 or pos.x < 0 or pos.y > 12 or pos.y < 0:
             return False
-        # if (pos.x, pos.y) == (5,5) or (pos.x, pos.y) == (5,6) or (pos.x, pos.y) == (5,7) or (pos.x, pos.y) == (6,7) or (pos.x, pos.y) == (7,7) or (pos.x, pos.y) == (7,6) or (pos.x, pos.y) == (7,5): #supposed to be the corrall but idk if i got the locations cortect
+        if (pos.x, pos.y) == (5,5) or (pos.x, pos.y) == (5,6) or (pos.x, pos.y) == (5,7) or (pos.x, pos.y) == (6,7) or (pos.x, pos.y) == (7,7) or (pos.x, pos.y) == (7,6) or (pos.x, pos.y) == (7,5): #supposed to be the corrall but idk if i got the locations cortect
+            return False
+        return True
+    
+    @staticmethod 
+    def comboAllowed(robot, bull):
+        if (robot == Location(6, 6) and bull == Location(6, 5)) or (robot == Location(6, 5) and bull == Location(6, 4)):
+             return False
+        if robot == bull:
             return False
         return True
     
