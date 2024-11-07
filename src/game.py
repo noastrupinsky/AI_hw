@@ -6,8 +6,10 @@ class Game:
     
     def __init__(self) -> None:
         self.hash_table = {}
+        self.visited = set()
+        # self.options = set()
         # pass
-    def instertTStar(self, coord1, coord2, value):
+    def insertTStar(self, coord1, coord2, value):
         # Use a tuple of tuples as the key
         self.hash_table[(coord1, coord2)] = value
     
@@ -16,37 +18,60 @@ class Game:
     
     def getStoredTStar(self, coord1, coord2):
         return self.hash_table.get((coord1, coord2), None)
+    
+    def insertVisited(self, coord1, coord2):
+        self.visited.add((coord1, coord2))
+        
+    def isVisited(self, coord1, coord2):
+        return (coord1, coord2) in self.visited
+    
+    # def insertOption(self, value):
+    #     self.options.add(value)
+    
+    # def resetOptions(self):
+    #     self.options.clear()
+    
+    # def findMin(self):
+    #     return min(self.options)
 
     def tStar(self, posB, posC):
    
-        if posB.x == 6 & posB.y == 6:
+        if posB.x == 6 and posB.y == 6:
             return 0
+        
+        self.insertVisited((posC.x, posC.y),(posB.x, posB.y))
  
         cNextIdeas = self.getCNextIdeas(posC, posB)
-        minTStar = sys.maxsize
-
+        # self.resetOptions()
+        options = set()
+        options.add(sys.maxsize)
         for cNext in cNextIdeas:
             bNextIdeas = self.getBNextIdeas(posB, cNext) 
-            tStarForThisCNext = 1
             for bNext in bNextIdeas:
+                tStarValue = 0
+                
+                if self.isVisited((cNext.x, cNext.y),(bNext.x, bNext.y)):
+                    continue
+                if(cNext.x == bNext.x and cNext.y == bNext.y):
+                    continue
+                
                 if(self.isKnownTStar((cNext.x, cNext.y),(bNext.x, bNext.y))):
-                    tStarForThisCNext+= self.getStoredTStar((cNext.x, cNext.y),(bNext.x, bNext.y))
+                    tStarValue = self.getStoredTStar((cNext.x, cNext.y),(bNext.x, bNext.y))
                 else:
-                    thisTStar = self.tStar(bNext, cNext) #potentially prune away rounds of tStar when the probability is 0 anyways
-                    tStarForThisCNext += thisTStar
-                    self.instertTStar((cNext.x, cNext.y),(bNext.x, bNext.y),thisTStar)
+                    tStarValue = self.tStar(bNext, cNext)
+                    self.insertTStar((cNext.x, cNext.y),(bNext.x, bNext.y), tStarValue)
                     
-            if tStarForThisCNext < minTStar: #
-                minTStar = tStarForThisCNext
+                # print(tStarValue)
+                options.add(tStarValue)
        
-        return minTStar
+        return 1 + min(options)
     
     def getCNextIdeas(self, posC, posB):
         #check if all 8 movements are possible - not walls etc and that the bull isn't in the way
         cNextIdeas = [Location(posC.x, posC.y-1), Location(posC.x-1, posC.y), Location(posC.x+1, posC.y), Location(posC.x, posC.y+1), Location(posC.x+1, posC.y+1), Location(posC.x-1, posC.y-1), Location(posC.x+1, posC.y-1), Location(posC.x-1, posC.y+1)]
         cNextToReturn = deque()
         for idea in cNextIdeas:
-            if Location.spotAllowed(idea) & ~(idea.x == posB.x and idea.y == posB.y):
+            if Location.spotAllowed(idea) and not (idea.x == posB.x and idea.y == posB.y):
                 cNextToReturn.append(idea)
         return cNextToReturn
     
@@ -72,22 +97,12 @@ class Game:
     
         if len(bNextToReturn) == 0:
             bNextToReturn.append(posB)
-        
-        #figure out if we're in the 5x5
-        #If in 5x5:
-            #get manhattanDistanec to posC
-            #any place the bull is not allowed to go has probability 0
-            #if there are 2 possible places to go, they each get probability 0.5
-            #if there is 1 possible place to go it gets probability 1
-            #If there's nowhere for the bull to go (likely bc the robot is in the way) then return the current location with a probability of 1.
-        
-        #If not in 5x5:
-            #Any move that isn't hitting the wall or the robot gets equal prob. Those things get prob 0.
+
         return bNextToReturn
     
 if __name__ == "__main__":
     sys.setrecursionlimit(100000)
     game = Game()
-    result = game.tStar(Location(6, 4), Location(5, 8))
+    result = game.tStar(Location(0, 0), Location(12, 12))
     print(result)
         

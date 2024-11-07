@@ -58,9 +58,9 @@ class Location:
     
     @staticmethod
     def spotAllowed(pos):
-        if pos.x > 12 | pos.x < 0 | pos.y > 12 | pos.y < 0:
+        if pos.x > 12 or pos.x < 0 or pos.y > 12 or pos.y < 0:
             return False
-        if (pos.x, pos.y) == (5,5) or (pos.x, pos.y) == (5,6) or (pos.x, pos.y) == (5,7) or (pos.x, pos.y) == (6,7) or (pos.x, pos.y) == (7,7) or (pos.x, pos.y) == (7,6) or (pos.x, pos.y) == (7,5): #supposed to be the corrall but idk if i got the locations cortect
+        # if (pos.x, pos.y) == (5,5) or (pos.x, pos.y) == (5,6) or (pos.x, pos.y) == (5,7) or (pos.x, pos.y) == (6,7) or (pos.x, pos.y) == (7,7) or (pos.x, pos.y) == (7,6) or (pos.x, pos.y) == (7,5): #supposed to be the corrall but idk if i got the locations cortect
             return False
         return True
     
