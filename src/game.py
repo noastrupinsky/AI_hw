@@ -5,21 +5,37 @@ from grid import Location
 class Game:
     
     def __init__(self) -> None:
-        pass
+        self.hash_table = {}
+        # pass
+    def instertTStar(self, coord1, coord2, value):
+        # Use a tuple of tuples as the key
+        self.hash_table[(coord1, coord2)] = value
+    
+    def isKnownTStar(self, coord1, coord2):
+        return (coord1, coord2) in self.hash_table
+    
+    def getStoredTStar(self, coord1, coord2):
+        return self.hash_table.get((coord1, coord2), None)
 
     def tStar(self, posB, posC):
    
-        if posB == (6,6):
+        if posB.x == 6 & posB.y == 6:
             return 0
  
         cNextIdeas = self.getCNextIdeas(posC, posB)
-        minTStar = max
+        minTStar = sys.maxsize
 
         for cNext in cNextIdeas:
-            bNextIdeas = self.getBNextIdeas(posB, cNext) #bNext returns [probability, action]
+            bNextIdeas = self.getBNextIdeas(posB, cNext) 
             tStarForThisCNext = 1
             for bNext in bNextIdeas:
-                tStarForThisCNext += self.tStar(bNext, cNext) #potentially prune away rounds of tStar when the probability is 0 anyways
+                if(self.isKnownTStar((cNext.x, cNext.y),(bNext.x, bNext.y))):
+                    tStarForThisCNext+= self.getStoredTStar((cNext.x, cNext.y),(bNext.x, bNext.y))
+                else:
+                    thisTStar = self.tStar(bNext, cNext) #potentially prune away rounds of tStar when the probability is 0 anyways
+                    tStarForThisCNext += thisTStar
+                    self.instertTStar((cNext.x, cNext.y),(bNext.x, bNext.y),thisTStar)
+                    
             if tStarForThisCNext < minTStar: #
                 minTStar = tStarForThisCNext
        
@@ -41,14 +57,15 @@ class Game:
         if in5x5Status:
             currentDistance = Location.manhattanDistance(posB, posC)
             
-        potentialIdeas = deque()
+        # potentialIdeas = deque()
         bNextToReturn = deque()
         
         #WIP why do we return ideas that are prob zero - wont that make the recursion tree larger?
         for idea in bNextIdeas:
             if Location.spotAllowed(idea):
                 if in5x5Status:
-                    if Location.manhattanDistance(idea, posC) < currentDistance:
+                    distFromRobot = Location.manhattanDistance(idea, posC)
+                    if distFromRobot <= currentDistance:
                         bNextToReturn.append(idea)
                 else:
                     bNextToReturn.append(idea)
@@ -71,6 +88,6 @@ class Game:
 if __name__ == "__main__":
     sys.setrecursionlimit(100000)
     game = Game()
-    result = game.tStar(Location(0, 0), Location(12, 12))
+    result = game.tStar(Location(6, 4), Location(5, 8))
     print(result)
         

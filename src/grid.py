@@ -66,7 +66,9 @@ class Location:
     
     @staticmethod
     def inThe5by5(posB, posC):
-        if abs(posB.x-posC.x) <= 5 & abs(posB.y-posC.y) <= 5:
+        row = abs(posB.x-posC.x)
+        col = abs(posB.y-posC.y)
+        if (row <= 5) & (col <= 5):
             return True
         return False
     
