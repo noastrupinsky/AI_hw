@@ -76,7 +76,7 @@ class Location:
     
     @staticmethod 
     def comboAllowed(robot, bull):
-        if (robot == Location(6, 6) and bull == Location(6, 5)):#or (robot == Location(6, 5) and bull == Location(6, 4))
+        if (robot == Location(6, 6) and bull == Location(6, 5)):
              return False
         if robot == bull:
             return False

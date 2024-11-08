@@ -13,10 +13,6 @@ class Game:
         self.minMoves[(bull, robot)] = value
     
     def getStoredMinMoves(self, bull, robot):
-        if self.minMoves.get((bull, robot)) == None:
-            
-            print("WHY")
-            self.printPositions(bull, robot)
         return self.minMoves.get((bull, robot))
 
     def printPositions(self, bull, robot):
