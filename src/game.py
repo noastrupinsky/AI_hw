@@ -14,12 +14,16 @@ class Game:
     
     def getStoredMinMoves(self, bull, robot):
         if self.minMoves.get((bull, robot)) == None:
+            
             print("WHY")
+            self.printPositions(bull, robot)
         return self.minMoves.get((bull, robot))
 
-    
+    def printPositions(self, bull, robot):
+        print(f"Bull: ({bull.x}, {bull.y}) Robot: ({robot.x}, {robot.y}).")
+
     def converge(self):
-        curr = self.getStoredMinMoves(Location(6, 5), Location(4, 6))
+        curr = self.getStoredMinMoves(Location(0, 0), Location(12, 12))
         new = -1
         i = 1
         while not curr == new:
@@ -28,9 +32,9 @@ class Game:
             for (bull, robot) in (self.minMoves.keys()):
                 # if(bull == Location(6,5) and robot == Location(4,6)):
                 self.insertMinMoves(bull, robot, self.tStar(bull, robot))
-            new = self.getStoredMinMoves(Location(6, 5), Location(4, 6))
+            new = self.getStoredMinMoves(Location(0, 0), Location(12, 12))
             
-            print(self.getStoredMinMoves(Location(6, 5), Location(4, 6)))
+            print(f" Value: {self.getStoredMinMoves(Location(0, 0), Location(12, 12))}")
             print(" ")
             i = i + 1
             
@@ -43,7 +47,7 @@ class Game:
                     states.append(Location(i, j))
         
         for bull, robot in permutations(states, 2):
-            if (robot == Location(6, 6) and bull == Location(6, 5)) or (robot == Location(6, 5) and bull == Location(6, 4)):
+            if not Location.comboAllowed(robot, bull):
                 continue
             if bull != robot:
                 self.insertMinMoves(bull, robot, 0)
@@ -55,7 +59,7 @@ class Game:
         if posB == Location(6, 6):
             return 0
 
-        if (posC == Location(6, 6) and posB == Location(6, 5)) or (posC == Location(6, 5) and posB == Location(6, 4)):
+        if not Location.comboAllowed(posC, posB):
             return sys.maxsize
 
         robotMoves = self.potentialRobotMoves(posC, posB)
@@ -64,12 +68,15 @@ class Game:
         for robotMove in robotMoves:
             
             bullMoves = self.potentialBullMoves(posB, robotMove) 
-            
             for bullMove in bullMoves:
                 if robotMove == bullMove:
                     continue
                 options.add(self.getStoredMinMoves(bullMove, robotMove))
-        return 1 + sum(options) / len(options)
+       
+            if not options:
+                    options.add(self.getStoredMinMoves(posB, robotMove))
+        return 1 + min(options)
+        # return 1 + sum(options) / len(options)
             
     
     def potentialRobotMoves(self, posC, posB):
@@ -79,7 +86,7 @@ class Game:
         possibleMoves = deque()
         
         for move in moves:
-            if Location.spotAllowed(move) and not (move.x == posB.x and move.y == posB.y):
+            if Location.spotAllowed(move) and not (move.x == posB.x and move.y == posB.y) and Location.comboAllowed(move, posB):
                 possibleMoves.append(move)
                 
         return possibleMoves
@@ -102,6 +109,9 @@ class Game:
                         possibleMoves.append(move)
                 else:
                     possibleMoves.append(move)
+            # elif (not Location.comboAllowed(currRobot, move)) and currRobot == Location(6, 5):
+            #     print(Location.comboAllowed(currRobot, move))
+            #     print(currRobot.x, currRobot.y, move.x, move.y)
     
         if len(possibleMoves) == 0:
             possibleMoves.append(currBull)
