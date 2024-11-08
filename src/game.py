@@ -26,11 +26,10 @@ class Game:
         curr = self.getStoredMinMoves(Location(0, 0), Location(12, 12))
         new = -1
         i = 1
-        while not curr == new:
+        while abs(curr - new) > 0.0001:
             print(f"iteration: {i}")
             curr = new
             for (bull, robot) in (self.minMoves.keys()):
-                # if(bull == Location(6,5) and robot == Location(4,6)):
                 self.insertMinMoves(bull, robot, self.tStar(bull, robot))
             new = self.getStoredMinMoves(Location(0, 0), Location(12, 12))
             
@@ -69,10 +68,7 @@ class Game:
                 if robotMove == bullMove:
                     continue
                 sumBullMoves +=self.getStoredMinMoves(bullMove, robotMove)
-                # options.add(self.getStoredMinMoves(bullMove, robotMove))
-            options.add(sumBullMoves/len(bullMoves)) #SEE THIS: for each robot move we have an average of the T stars of the different bull options. since the robot moves optimally, we take the min of these averages plus 1 to be the Tstar for the current state
-            # if not options:
-            #         options.add(self.getStoredMinMoves(posB, robotMove))
+            options.add(sumBullMoves/len(bullMoves)) #for each robot move we have an average of the T stars of the different bull options. since the robot moves optimally, we take the min of these averages plus 1 to be the Tstar for the current state
         return 1 + min(options)            
     
     def potentialRobotMoves(self, posC, posB):
@@ -116,5 +112,4 @@ if __name__ == "__main__":
     game = Game()
     game.initStates()
     game.converge()
-    # print(result)
         
