@@ -38,7 +38,6 @@ class Game:
             print(" ")
             i = i + 1
             
-    
     def initStates(self):   
         states = deque()
         for i in range(13):
@@ -59,25 +58,22 @@ class Game:
         if posB == Location(6, 6):
             return 0
 
-        if not Location.comboAllowed(posC, posB):
-            return sys.maxsize
-
         robotMoves = self.potentialRobotMoves(posC, posB)
         options = set()
         
         for robotMove in robotMoves:
             
             bullMoves = self.potentialBullMoves(posB, robotMove) 
+            sumBullMoves = 0
             for bullMove in bullMoves:
                 if robotMove == bullMove:
                     continue
-                options.add(self.getStoredMinMoves(bullMove, robotMove))
-       
-            if not options:
-                    options.add(self.getStoredMinMoves(posB, robotMove))
-        return 1 + min(options)
-        # return 1 + sum(options) / len(options)
-            
+                sumBullMoves +=self.getStoredMinMoves(bullMove, robotMove)
+                # options.add(self.getStoredMinMoves(bullMove, robotMove))
+            options.add(sumBullMoves/len(bullMoves)) #SEE THIS: for each robot move we have an average of the T stars of the different bull options. since the robot moves optimally, we take the min of these averages plus 1 to be the Tstar for the current state
+            # if not options:
+            #         options.add(self.getStoredMinMoves(posB, robotMove))
+        return 1 + min(options)            
     
     def potentialRobotMoves(self, posC, posB):
 
@@ -86,7 +82,7 @@ class Game:
         possibleMoves = deque()
         
         for move in moves:
-            if Location.spotAllowed(move) and not (move.x == posB.x and move.y == posB.y) and Location.comboAllowed(move, posB):
+            if Location.spotAllowed(move) and Location.comboAllowed(move, posB):
                 possibleMoves.append(move)
                 
         return possibleMoves
@@ -109,9 +105,6 @@ class Game:
                         possibleMoves.append(move)
                 else:
                     possibleMoves.append(move)
-            # elif (not Location.comboAllowed(currRobot, move)) and currRobot == Location(6, 5):
-            #     print(Location.comboAllowed(currRobot, move))
-            #     print(currRobot.x, currRobot.y, move.x, move.y)
     
         if len(possibleMoves) == 0:
             possibleMoves.append(currBull)
